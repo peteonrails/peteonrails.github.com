@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>VoteFu is now available on GemCutter - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="@alexanderkahn asked me via Twitter whether I&#8217;d be pushing VoteFu to GemCutter. To tell you the truth, I hadn&#8217;t really thought about it. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2009/11/14/votefu-is-now-available-on-gemcutter/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">VoteFu Is Now Available on GemCutter</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-11-14T00:00:00-05:00" pubdate data-updated="true">Nov 14<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><img class="alignright size-thumbnail wp-image-195" title="gem" src="http://blog.peteonrails.com/wp-content/uploads/2009/11/gem-150x150.jpg" alt="gem" width="150" height="150" />@alexanderkahn asked me via <a class="zem_slink" title="Twitter" rel="homepage" href="http://twitter.com/">Twitter</a> whether I&#8217;d be pushing VoteFu to GemCutter. To tell you the truth, I hadn&#8217;t really thought about it. But, it does seem to be what all the cool kids are doing.
+
+Want to see how easy it was to move to GemCutter?
+<pre lang="bash">ping:$ sudo gem install gemcutter
+Password:
+
+========================================================================
+
+           Thanks for installing Gemcutter! You can now run:
+
+    gem tumble        use Gemcutter as your primary RubyGem source
+    gem push          publish your gems for the world to use and enjoy
+    gem migrate       take over your gem from <a class="zem_slink" title="RubyForge" rel="homepage" href="http://rubyforge.org/">RubyForge</a> on Gemcutter
+    gem owner         allow/disallow others to push to your gems
+
+========================================================================
+
+Successfully installed gemcutter-0.1.6
+1 gem installed
+Installing ri documentation for gemcutter-0.1.6...
+Installing RDoc documentation for gemcutter-0.1.6...
+ping: Pete$ gem tumble
+Thanks for using Gemcutter!
+Your gem sources are now:
+- http://gemcutter.org
+- http://gems.rubyforge.org
+- http://gems.github.com
+ping:workspace Pete$ cd vote_fu_harness/vendor/plugins/vote_fu/
+ping:vote_fu Pete$ ls
+CHANGELOG.markdown      README.markdown         examples                init.rb                 rails                   test
+MIT-LICENSE             db                      generators              lib                     spec                    vote_fu.gemspec
+ping:vote_fu Pete$ gem build vote_fu.gemspec
+WARNING:  no rubyforge_project specified
+  Successfully built RubyGem
+  Name: vote_fu
+  Version: 0.0.11
+  File: vote_fu-0.0.11.gem
+ping:vote_fu Pete$ gem push vote_fu-0.0.11.gem
+Enter your Gemcutter credentials. Don't have an account yet? Create one at http://gemcutter.org/sign_up
+Email:   pete@peteonrails.com
+Password:
+Signed in. Your api key has been stored in ~/.gemrc
+Pushing gem to Gemcutter...
+Successfully registered gem: vote_fu (0.0.11)
+ping:vote_fu Pete$</pre>
+Scarily easy. In under 3 minutes I have a new primary gem source and am set up to publish to GemCutter.
+
+So, why would one want o host Gems on GemCutter? I asked the same question. In a nutshell:
+<ol>
+	<li>Download counts are shown inline</li>
+	<li>Build locally, then push-to-publish. No more waiting to make your way through DJ, BJ, Resque, or whatever the background framework of the day is at <a class="zem_slink" title="GitHub" rel="homepage" href="http://github.com">GitHub</a>.</li>
+	<li>It&#8217;s nothing but gem hosting, so it&#8217;ll probably grow to do gem hosting really well.</li>
+	<li>It&#8217;s ThoughtBot. I like the ThoughtBot guys.</li>
+</ol>
+So, there&#8217;s no real compelling reason to run out and move your gems to GemCutter, but if your users ask you to do it, it takes 3 minutes or less.
+<div class="zemanta-pixie" style="margin-top: 10px; height: 15px;"><a class="zemanta-pixie-a" title="Reblog this post [with Zemanta]" href="http://reblog.zemanta.com/zemified/a240f45a-6168-42d3-808c-922211278fb5/"><img class="zemanta-pixie-img" style="border: none; float: right;" src="http://img.zemanta.com/reblog_e.png?x-id=a240f45a-6168-42d3-808c-922211278fb5" alt="Reblog this post [with Zemanta]" /></a><span class="zem-script more-related pretty-attribution"><script src="http://static.zemanta.com/readside/loader.js" type="text/javascript"></script></span></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-11-14T00:00:00-05:00" pubdate data-updated="true">Nov 14<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2009/11/14/votefu-is-now-available-on-gemcutter/" data-via="" data-counturl="http://peteonrails.github.com/blog/2009/11/14/votefu-is-now-available-on-gemcutter/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/11/11/how-i-became-convinced-to-use-dbpopulate-instead-of-dbmigrate-with-inline-data-seeding-and-why-you-should-too/" title="Previous Post: How I became convinced to use db:populate instead of db:migrate with inline data seeding, and why you should too.">&laquo; How I became convinced to use db:populate instead of db:migrate with inline data seeding, and why you should too.</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/11/17/new-rails-plugin-available-yaml-twitter-oauth/" title="Next Post: New Rails Plugin Available: YAML Twitter OAuth">New Rails Plugin Available: YAML Twitter OAuth &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

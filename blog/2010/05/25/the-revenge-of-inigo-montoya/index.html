@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>The Revenge of Inigo Montoya - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content=":false You keep using that symbol. I do not think it means what you think it means. Today, I&#8217;d like to describe something I like to call: The &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2010/05/25/the-revenge-of-inigo-montoya/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">The Revenge of Inigo Montoya</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-05-25T00:00:00-04:00" pubdate data-updated="true">May 25<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><pre lang='ruby'>
+:false
+</pre>
+
+You keep using that symbol. I do not think it means what you think it means. 
+
+Today, I&#8217;d like to describe something I like to call: <strong>The Inigo Montoya Attack</strong>. It is the implementation in code &#8211; often with good intentions, but sometimes simply because of ignorance &#8211; of an algorithm which masks one clear, well-known paradigm inside of another that completely obfuscates your actual intent.  Unless you have six-fingers on your right hand (I&#8217;m talking to YOU, <a href="http://en.wikipedia.org/wiki/Count_Rugen">Count Rugen</a>) you are forbidden from this practice. 
+
+Here&#8217;s some code I came across in a codebase I was maintaining. 
+
+<pre lang='ruby'>
+ def logged_in_from_token?
+    current_user = token_exists? ? log_in_from_token : :false
+ end
+</pre>
+
+It looks strange. It OUGHT to look strange. What is that :false symbol all about? 
+
+I&#8217;ll tell you what it is. It&#8217;s a very misleading piece of code. Because when you do not log the user in from a token, current_user is NOT set to false, in the boolean sense. It is, in fact, a boolean &#8220;true&#8221; value in Ruby. 
+
+Try this in IRB: 
+
+<pre lang='ruby'>
+ if :false  
+   puts "You keep using that word. I do not think it means what you think it means." 
+else 
+  puts "Have fun storming the castle!"
+end
+</pre>
+
+If <em><strong>:false</strong></em> evaluated to a <em>boolean false</em> value, then you&#8217;d see &#8220;Have fun storming the castle!&#8221;. But instead, you get &#8220;You keep using that word. I do not think it means what you think it means.&#8221; If you&#8217;re trying to make readable code, using the symbol <em><strong>:false</strong></em> is dangerous and misleading. 
+
+To make matters worse, this code assigns <em><strong>:false</strong></em> to the value <strong>current_user</strong>, which is a well-known and established name used in a number of Rails patterns. RESTFul Authentication and Authlogic BOTH support the notion of <strong>current_user</strong>, and when nobody is logged in, THAT METHOD RETURNS FALSE. Not the doppleganger wannabe <em><strong>:false</strong></em>, but a real, honest to goodness, <em>boolean false</em>. (OK: it&#8217;s actually returning nil, but nil is false). 
+
+So imagine my bewilderment when this basic test no longer worked: 
+
+<pre lang='ruby'>
+  <%- if current_user %>
+    <%= display_logged_in_stuff()  %>
+  <% else %>
+      You are not logged in
+   <% end %>
+</pre>
+
+So a couple hours of debugging later, I found myself using &#8216;ack in project&#8217; to remove all references to the silly symbol <em><strong>:false</strong></em>. 
+
+Lessons for Rubyists: 
+<ol>
+	<li>Be clear. :false is never actually false. Don&#8217;t use it. </li>
+	<li>Follow established conventions. The method <strong>some_test?</strong> should always return a boolean value. If it doesn&#8217;t, leave off the question mark!</li>
+ 	<li>Don&#8217;t reinvent the wheel! The implementor of the code above could have simply used RESTful Authentication or Authlogic and have avoided the whole mess. </li>
+	<li>Unit tests are still important! Remember that someone has to maintain your stuff someday. A simple unit test would have caught the bug introduced by using the symbol <strong>:false</strong> in place of a <em><strong>boolean false</strong></em>.</li>
+</ol>
+
+Have fun storming the castle!
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-05-25T00:00:00-04:00" pubdate data-updated="true">May 25<span>th</span>, 2010</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2010/05/25/the-revenge-of-inigo-montoya/" data-via="" data-counturl="http://peteonrails.github.com/blog/2010/05/25/the-revenge-of-inigo-montoya/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/" title="Previous Post: Oracle Spatial support in spatial_adapter for ActiveRecord">&laquo; Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/07/09/intro-to-spatial-programming/" title="Next Post: Intro to Spatial Programming">Intro to Spatial Programming &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rails 2.1 nested routes and complex nestings - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="The new Rails routing has nice support for nested reources. And, I think it handles just enough nesting. Any more support, and it&#8217;s possible to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2008/06/08/rails-2-1-nested-routes-and-complex-nestings/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rails 2.1 Nested Routes and Complex Nestings</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-08T00:00:00-04:00" pubdate data-updated="true">Jun 8<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">The new Rails routing has nice support for nested reources. And, I think it handles just enough nesting. Any more support, and it&#8217;s possible to go overboard and write ugly code. 
+
+For example, here is what Rails now supports for nested routing syntax: 
+
+<pre lang="ruby" line="1">
+  # Simple parent child association
+  map.resources :user, :has_many => :posts
+
+  # A parent with many types of children
+  map.resources :posts, :has_many => [:comments, :trackbacks, :pingbacks ]
+</pre>
+Nice. That is prefectly terse and descriptive, without being too clever. 
+
+There has been some debate and consternation over why a complicated multi-nested resource can&#8217;t be set up this way. For example, if I am building a project management tool, why can&#8217;t I do this?
+
+<pre lang="ruby" line="1">
+map.resources :projects, 
+  :has_many => [ :releases,  :milestones => [:tasks, {:features => :tasks}] } ]
+</pre>
+That is, a project has many releases AND milestones, and in turn milestones have many tasks and features. And, features can also have tasks. 
+
+That&#8217;s complicated, and too much cleveness to jam into one statement. I think Rails 2.0.2 / 2.1 has it right in making you write that routing rule like this: 
+
+<pre lang="ruby" line="1">
+  map.resources :projects do |project|
+    project.resources :releases
+    project.resources :milestones do |milestone| 
+      milestone.resources :tasks
+      milestone.resources :features do |feature|
+        feature.resources :tasks
+      end
+    end
+  end
+</pre>
+I hear a crowd of people clamoring for the uber-terse syntax outlined in the second listing. I think that&#8217;s a <strong>bad idea</strong>. It encourages hard-to-follow, obfuscated code. 
+
+When you have to do something complicated, it&#8217;s worth taking a few extra lines to make it clear to the next programmer. 
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-08T00:00:00-04:00" pubdate data-updated="true">Jun 8<span>th</span>, 2008</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2008/06/08/rails-2-1-nested-routes-and-complex-nestings/" data-via="" data-counturl="http://peteonrails.github.com/blog/2008/06/08/rails-2-1-nested-routes-and-complex-nestings/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2008/06/06/oops-forgot-to-freeze-my-gems/" title="Previous Post: Oops. Forgot to Freeze my Gems.">&laquo; Oops. Forgot to Freeze my Gems.</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2008/06/09/peteonrails-typo-theme/" title="Next Post: PeteOnRails Typo Theme">PeteOnRails Typo Theme &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

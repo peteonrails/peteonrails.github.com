@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>acts-as-taggable-on and space delimited tag lists - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="UPDATE: I made the classic coder mistake, and didn&#8217;t dig into the plugin code before working around it. I am leaving this post up instead of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2008/07/14/acts-as-taggable-on-and-space-delimited-tag-lists/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Acts-as-taggable-on and Space Delimited Tag Lists</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-07-14T00:00:00-04:00" pubdate data-updated="true">Jul 14<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2> UPDATE: </h2>
+
+I made the classic coder mistake, and didn&#8217;t dig into the plugin code before working around it. I am leaving this post up instead of being embarrassed and deleting it because it a good example of why you should read your plugin code. After reading the code, I found that <strong>TAGLIST IS JUST AN ARRAY</strong>: you can simply do this and avoid all of the filter magic that I put in place below. 
+
+<pre lang="ruby" line="1">
+  # in config/initializers/tag_list.rb
+  TagList.delimiter = " "
+</pre>
+
+Drat. That&#8217;s way better. 
+
+As it turns out, this answer is in the README for acts_as_taggable_on_steroids, but not in acts_as_taggable_on. I&#8217;m sending Michael a note to ask him to include that detail in the documentation. 
+
+<h2> Original Post </h2>
+
+Michael Bleigh&#8217;s <a href="http://www.intridea.com/tags/acts_as_taggable_on">acts_as_taggable_on</a> plugin is a useful extension of acts_as_taggable_on_steroids. 
+
+When using it in forms, however, many users have noticed that the @model.tag_list field deals with comma separated lists of tags, like so: 
+
+<pre lang="ruby" line="1">
+# From the README
+@user.tag_list = "awesome, slick, hefty"      # this should be familiar
+</pre>
+
+If, in your edit view template, you provide a text field for your users to type in freeform tags, then you will find that your database tables have multiword tags instead of multiple tags. This is less than ideal. Users do not like to type commas. 
+
+Build your form like this, and you will see the issue when a user types in &#8220;awesome slick hefty&#8221; in the input box. 
+
+<pre lang="html">
+<% form_for([@model]) do |f| %>
+    <div id="model_tags">
+	Tags: <%= f.text_field :tag_list %> 		
+    </div>
+...
+<% end %>
+</pre>
+
+You will see this in your DB: 
+<pre lang="bash">
++----+-----------------------------------+
+| id | name                              |
++----+-----------------------------------+
+|  1 | awesome slick hefty               | 
++----+-----------------------------------+
+</pre>
+
+What you <em> wanted </em> was this: 
+<pre lang="bash">
++----+-----------------------------------+
+| id | name                              |
++----+-----------------------------------+
+|  1 | awesome                           | 
+|  2 | slick                             | 
+|  3 | hefty                             | 
++----+-----------------------------------+
+</pre>
+
+
+
+<h2> The Answer </h2>
+My workaround involves using a before_filter to unroll the content of the input box, and a compactor method in the edit action to change the internal storage format of acts_as_taggable_on to the format that the user expects. Here is an example: 
+
+<pre lang="ruby" line="1">
+# ... In the taggable_controller
+  before_filter :join_tag_list, :only => [:create, :update]
+
+  # GET /users/:id/quotes/1/edit
+  def edit 
+    @model ||= Model.find(params[:id])
+    unroll_tag_list
+  end
+
+  private
+  def join_tag_list
+    # Split the tags on spaces and join into comma separated format
+    params[:model][:tag_list] = params[:model][:tag_list].split(" ").join(",")
+  end
+
+  def unroll_tag_list
+    # Split the tags on commas and join into a single space separated string
+    @model.tag_list = @model.tag_list.join(" ")    
+  end
+  
+</pre>
+
+That&#8217;s it! Now my users see and work with space-separated tags, and acts_as_taggable_on continues to store comma separated lists internally. 
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-07-14T00:00:00-04:00" pubdate data-updated="true">Jul 14<span>th</span>, 2008</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2008/07/14/acts-as-taggable-on-and-space-delimited-tag-lists/" data-via="" data-counturl="http://peteonrails.github.com/blog/2008/07/14/acts-as-taggable-on-and-space-delimited-tag-lists/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2008/07/13/announcing-votefu/" title="Previous Post: Announcing VoteFu">&laquo; Announcing VoteFu</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2008/07/21/you-are-invited-to-my-open-alpha-of-myquotablecom/" title="Next Post: You are invited to my open alpha of MyQuotable.com">You are invited to my open alpha of MyQuotable.com &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>The Case for Story Points - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="Scrum Masters embarking on a project or converting a team from conventional development to Scrum often run into one big roadblock: convincing the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2009/02/05/the-case-for-story-points/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">The Case for Story Points</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-02-05T00:00:00-05:00" pubdate data-updated="true">Feb 5<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">Scrum Masters embarking on a project or converting a team from conventional development to Scrum often run into one big roadblock: convincing the stakeholders to use Agile Estimation techniques. One of the most important and success-inducing things you can do when estimating an Agile project is to abandon the &#8220;hour&#8221; as the unit of estimation in favor of &#8220;story points&#8221;.
+
+The idea is, instead of using &#8220;hours&#8221; to estimate how long a story will take to complete, you instead have the team use an arbitrary figure called a &#8220;story point&#8221;. So, a new input field on a web page might be &#8220;1 point&#8221;. A new login screen is probably &#8220;3 points&#8221;. And adding a new payment gateway may be &#8220;8 points&#8221;.
+
+Each iteration will then have a point value assigned to it. For example, Iteration 6 may be &#8220;23 points&#8221;. When your team completes all of the functionality, the team&#8217;s velocity is &#8220;23 story points per iteration&#8221;. Savvy Scrum Masters will calculate Velocity as the moving average of the last 4 iterations.
+
+Why bother ditching the &#8220;hour&#8221;? Here&#8217;s why:
+<ol>
+	<li> It eliminates preconceived notions about how much code can be written in a day.</li>
+	<li>It eliminates the &#8220;Day&#8221; as an important unit of measure.</li>
+	<li>It forces you to forecast completion of your project based on evidence. If you estimate in hours, you&#8217;re already forecasting. If you estimate in points, you&#8217;re simply measuring complexity in relative terms and relying on past performance to predict future results. In software, that&#8217;s a good thing.</li>
+	<li>It helps to gel the team. If Joe can do a feature in 8 hours, and Eric can do that same feature in 12 hours, there&#8217;s going to be a disagreement on how much to estimate. Instead, shouldn&#8217;t Joe and Eric agree that &#8220;Two new fields on the screen is twice as big as one new field on the screen?&#8221; Over time, the difference in coding productivity between your team members will be abstracted away by the estimation technique, which allows each team member to play to their own strengths without being measures in widgets-per-hour.</li>
+	<li>It ends up being more accurate after 2 or 3 iterations.</li>
+	<li>It avoids the mythical man month problem. By insisting that you forecast based on evidence, a manager cannot offer to double the team size and cut the deadline in half.</li>
+</ol>
+There are lots more benefits. There are books full of the benefits. Read them.
+
+In convincing stakeholders to allow the engineering team to use Story Points, I have run into several objections. Here they are, along with the answers that I use.
+
+<strong>Objection: </strong>But if your numbers don&#8217;t map to hours, how do I know how long something will take?
+
+<strong>Answer:</strong> You use Velocity, as calculated by the evidence of progress your team produces, and map target dates based on what actually happened instead of a gut feeling.
+
+<strong>Objection:</strong> But then how do you know how much more you can get done by adding more resources to the project?
+
+<strong>Answer:</strong> Again, you use the evidence. Adding a new team member doesn&#8217;t immediately produce a faster tempo on a project. There is no way to know how a new team member will contribute to a self-organizing team until you see them perform. As that team member ramps up, the team will eventually start producing more story points per iteration. You will only take on work in a sprint that you historically could complete, and as you start completing all of the committed work faster, your velocity increases. The team is continually winning instead of lagging. If you instead use &#8220;hours&#8221; to estimate, you&#8217;d be tempted to just add &#8220;40 hours&#8221; to the velocity. That&#8217;s a guess, and it&#8217;ll be wrong every time.
+
+<strong>Objection</strong>: But then how do I calculate what a project costs me?<strong></strong>
+
+<strong>Answer</strong>: If you have all of the members of a Scrum team properly allocated, and you have an accurate forecast of the completion date, then you can easily calculate the project labor cost using very simple math. If you use hours instead, you use the same simple math, it&#8217;ll just be inaccurate.
+
+<strong>Objection:</strong> But then how do I know how much overtime to ask the developers to work in order to meet my deadlines?
+
+<strong>Answer:</strong> Forcing overtime to meet deadlines is a Scrum Smell. It means you are planning poorly, sticking to unreasonable deadlines, sacrificing quality, or the team is failing because of some organizational, process, or performance issue. That said, it is sometimes necessary to work overtime. Rather than tell everyone they need to work 10 extra hours this week to make the deliverable, it&#8217;s actually BETTER to say to your team: &#8220;We have 10 more story points to complete in 2 days, and we&#8217;re only burning 3 points per day.&#8221; If the Scrum Master is good, the team will know what to do. And they&#8217;ll do it as a team.
+
+Good luck! Let me know how it goes.
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-02-05T00:00:00-05:00" pubdate data-updated="true">Feb 5<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2009/02/05/the-case-for-story-points/" data-via="" data-counturl="http://peteonrails.github.com/blog/2009/02/05/the-case-for-story-points/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2008/12/04/myquotablecom-source-code-released/" title="Previous Post: MyQuotable.com Source Code released">&laquo; MyQuotable.com Source Code released</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/03/16/why-rails-developers-are-at-such-peace-with-the-world/" title="Next Post: Why Rails Developers are at such peace with the world.">Why Rails Developers are at such peace with the world. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

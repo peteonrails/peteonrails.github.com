@@ -1,0 +1,780 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="AttachmentFu is a great plugin. It&#8217;s heavily used all over the place to upload images to a Rails app. It&#8217;s also good with other file &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/page/7/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/04/30/adding-multiple-attachements-to-a-model-in-one-view/">Adding Multiple Attachements to a Model in One View</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-30T00:00:00-04:00" pubdate data-updated="true">Apr 30<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">AttachmentFu is a great plugin. It&#8217;s heavily used all over the place to upload images to a Rails app. It&#8217;s also good with other file types.
+
+I had a requirement to provide users with the ability to set up an entity (call it a Batch), then upload a number of CSV files to that batch. I used AttachmentFu, FasterCSV, and some Multi-Model editing forms to make the trickery work.
+
+Before starting, I set up the AttachmentFu plugin. If you have never done this before, <a href="http://clarkware.com/cgi/blosxom/2007/02/24#FileUploadFu"> Mike Clark&#8217;s Tutorial</a> is a good place to start. Install the plugin and take note of how you have to set up your Attachment model.
+
+Then, I had to set up a Multi-model editing form. If you haven&#8217;t done this before, then you should read Ryan Bates&#8217; tutorial on <a href="http://railsforum.com/viewtopic.php?pid=3713"> setting up multiple models in one view</a>.  In this situation, I had to modify some of the steps because we&#8217;re dealing with File Attachments, not Task objects. Here is what I did:
+
+First I created my &#8220;Batch&#8221; object.
+<pre lang="bash" line="1">
+script/generate migration Batch user_id:integer name:string
+</pre>
+
+Then I created my &#8220;Attachment&#8221; object.
+<pre lang="bash" line="1">
+script/generate migration Attachment
+</pre>
+
+I use Oracle. In order to make AttachmentFu work, I renamed &#8220;size&#8221; to &#8220;filesize&#8221;
+<pre lang="ruby" line="1">
+... In 002_create_attachment.rb
+def self.up
+  create_table :attachments do |t|
+  t.integer    :parent_id # foreign key to :batches
+  t.string     :content_type, :filename, :thumbnail
+  t.integer    :filesize, :width, :height
+end
+</pre>
+
+Then, in my Batch model, I added the Multi-Model handling code.  My method differs from the Rails Recipe because you cannot update an attachment once you upload it, only delete it. In the Update action, for each attachment on the model, we check to see where there is an attribute containing the ID of the attachment
+<pre lang="ruby" line="1">
+# If there is not an ID in an attribute, we delete the attachment.
+# ... In batch.rb
+has_many   :attachments, :foreign_key =&gt; "parent_id", :dependent =&gt; :destroy
+validates_associated    :attachments
+
+def new_attachment_attributes=(attrs)
+  attrs.each { |attr| attachments.build(attr) }
+end
+
+def existing_attachment_attributes=(attrs)
+  attachments.reject(&amp;:new_record?).each do |attach|
+    attachments.delete(attach) unless attrs[attach.id.to_s]
+  end
+end
+
+def save_attachments
+  attachments.each { |attach| attach.save(false) }
+end
+</pre>
+
+Then I set up the Attachment model to handle the AttachmentFu-ery.
+
+<pre lang="ruby" line="1">
+class Attachment < ActiveRecord::Base
+  belongs_to     :batch
+  has_attachment :storage =&gt; :file_system     # Or S3, or DB, or whatever
+  validates_as_attachment
+
+  ## Patch to make this AttachmentFu Model object work with Oracle.
+  def size
+    self.filesize
+  end
+
+  def size=(bytes)
+    self.filesize = bytes
+  end
+end
+</pre>
+
+Now I needed to build the view and controller support. To keep the app mostly RESTful, we let the standard &#8220;Attachment&#8221; controller be built by the scaffolding system. Since we will be primarily working with Attachments in the &#8220;Batch&#8221; view, though, I&#8217;ve omitted those details.
+
+Here is the additional controller code in batch_controller.rb:
+
+<pre lang="ruby" line="1">
+# GET /batches/new
+def new
+  @batch = Batch.new
+  @batch.attachments.build
+end
+
+def update
+  params[:batch][:existing_attachment_attributes] ||= {}
+
+  @batch = Batch.find(params[:id])
+
+  respond_to do |format|
+    if @batch.update_attributes(params[:batch])
+       flash[:notice] = 'Your Batch was updated successfully.'
+       format.html { redirect_to batch_url(@batch) }
+       format.xml  { head :ok }
+    else
+       format.html { render :action =&gt; "edit" }
+       format.xml  { render :xml =&gt; @batch.errors.to_xml }
+    end
+  end
+end
+</pre>
+What&#8217;s left? Setting up the views. We leave the scaffolded &#8220;index&#8221; action for the Batch view in place. Attachments aren&#8217;t relevant in that view. But in the &#8220;Edit&#8221; and &#8220;New&#8221; views, we need to create a custom form that can handle attaching files in addition to setting up the Batch model object.
+
+Step 1, make the Edit and New actions point to a shared form:
+
+<pre lang="html" line="1">
+<!-- Contents of views/batches/new.html.erb
+and views/batches/edit.html.erb
+-->
+<div class="greybox"><%= render :partial =>; 'form' %></div>
+</pre>
+Then, we set up the shared form in a partial like so:
+
+<pre lang="html" line="1">
+<h1>Schedule A Batch</h1>
+<!-- views/batches/_form.html.erb: error display code omitted -->
+  <% form_for(@batch, :html => { :multipart => true }) do |f| %>
+  <strong>Name:</strong> <%= f.text_field :name %>
+  <div id="attachments"><%= render :partial => "attachment", :collection =>  
+  @batch.attachments%></div>
+  <%= add_attachment_link "Add a File" %>
+  Total Line Count: <%= @batch.prod_line_count %>
+
+  <input name="batch[user_id]" type="hidden" value="<%= @user.id %>" />
+
+  <%= submit_tag "Save Changes" %&gt; or &lt;%= link_to 'Cancel', batches_path %>
+
+  <% end %>
+</pre>
+
+The code above renders the primary Model object, and then renders the associated attachments using the &#8220;_attachment&#8221; partial. Let&#8217;s take a look at that code:
+
+<pre lang="html" line="1">
+<div id="attachments" class="attachment"><% new_or_existing = attachment.new_record? ? 'new' : 'existing' %>
+  <% prefix = "batch[#{new_or_existing}_attachment_attributes][]" %>
+  <% fields_for prefix, attachment do |af| -%>
+
+  <strong>Attached File:</strong>
+  <% if attachment.new_record? %>
+
+
+  <%= af.file_field :uploaded_data %>
+  <% else %>
+  <%= af.hidden_field :id %>
+  <%= attachment.filename %>
+  <%= link_to_function "remove", "$(this).up('.attachment').remove()" unless params[:action] == "show"%>
+  <% end %>
+
+  <% end -%>
+</div>
+</pre>
+This sets the front end up to show the attached files, and provide a link to delete each on on the front end using javascript (unless we are being rendered in the &#8220;show&#8221; action. We&#8217;ll refactor that piece of bad juju later).
+
+The last piece of work to do is to set up the &#8220;show&#8221; action to display the child records. This isn&#8217;t hard. There is no need to modify the default scaffolded view. Just add the partial to show the attachments:
+
+<pre lang="html" line="1">
+<-- Add to views/batches/show.html.erb -->
+<div id="attachments"><%= render :partial => "attachment", :collection => @batch.attachments%></div>
+</pre>
+
+That&#8217;s it. You still have an application that responds RESTfully to Batch and Attachment requests, but when you are a person in front of a browser, you can attach multiple files to your Batch object.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/11/06/health-care-wal-mart-hsas-cdh-plans-and-the-future-of-benefits-in-this-nation/">Health Care, Wal-Mart, HSAs, CDH Plans, and the Future of Benefits in This Nation.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-11-06T00:00:00-05:00" pubdate data-updated="true">Nov 6<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I read blogs from time to time. One of my favorites is <a HREF="http://avc.blogs.com/a_vc/">A VC</a>. I first started reading this blog when I was <a HREF="http://www.livejournal.com/users/peterjacksonmd/616.html#cutid1">doing research on Radio&#8217;s Changing Business Model</a>.
+
+Today, there&#8217;s an interesting discussion going on over there about <a HREF="http://avc.blogs.com/a_vc/2005/11/walmart_is_doin.html">whether Wal-Mart might be doing us a favor by offering crappy Health Insurance benefits</a>. I do some work in Health Insurance, so I was intrigued by this. 
+
+Having worked in consulting for a few health care payors, I have a pretty strong opinion about waste, overhead, and misplaced priorities among insurance companies. I agree with Fred&#8217;s post that in order for things to change for the better, we may need to change the insurance model, and employer paid insurance as we know it may have to change.
+<lj-cut>
+I can&#8217;t agree with Chad&#8217;s comment, though. Chad believes pretty strongly in the creation of a single-payor healthcare system in the US. A lot of people do, in fact. It&#8217;s not without its strong points. I think that as a matter of politics, it&#8217;s good to get that discussion going. But although my politics tend to be liberal, a single payor system like he describes is too ripe for inefficiency of a different kind. 
+
+While it&#8217;s true that Medicare&#8217;s administrative overhead is about 1.4% vs. an industry figure closer to 8 or 9%, there&#8217;s something missing in all of the single payor solutions that I have heard about. That is, there is no incentive to provide quality or timely service in a single payor system. Forming a monopoly, whether administered by the government or someone else, will have a chilling effect on medical and pharmaceutical innovation, service levels, and adequate care. The rich will pay private doctors, and the poor will be stuck filling out a dozen forms to get Medicare to pay for an emergency room visit. Meanwhile the overhead that the single-payor consumes will probably rise from the reasonable 1.4% that Medicare uses, to a much higher amount when we start to see that the Medicare model doesn&#8217;t scale well past its original design intentions. 
+
+The reason health insurance sucks in the US isn&#8217;t because we don&#8217;t have socialized medicine, or because drug companies overcharge and advertise on TV too much (though as a policy, I think it&#8217;s poor medicine to have patients asking for specific medications). It&#8217;s because the market is broken: the consumer who uses healthcare is not the same person as the customer who buys the health insurance offering. To make matters worse, we&#8217;ve got a marketplace full of consumers that have a low level of expertise. And who outside the industry can really read and understand an Explanation of Benefits for a complex but common procedure like childbirth? Even if you could understand the EOB, would you care that your insurance company was overcharged for something and report it?
+
+I think that the shift toward Consumer-Directed-Health plans (high deductible insurance plans coupled with an HSA or HRA to cover the deductible) are a major step in the right direction. Under these plans, you are issued a debit card with $2500 on it, and an insurance policy with a $2500 deductible. If you don&#8217;t use all $2500, you get to roll the money over to the next year tax-free.  Did I mention that an HSA is the ONLY type of account in this country where the money goes in tax free, then also comes out tax free? Or that you can invest the contents of your HSA in mutualk funds if you&#8217;re bold? Over time, a young person could build up a sizeable account for health care needs in retirement. If we start to offer economic incentives to people that reward them for using healthcare intelligently, learning more about treatment options, and exercising preventive care, we&#8217;ll end up being better off in the long run.
+
+The problem is getting the information to healthcare consumers, and getting them to read it. Healthcare is still one of the areas where the information is not readily available in a compiled, free, consistent, accessible easy-to-understand format.
+
+It&#8217;s far easier to have an insurance card that you just present at the doctor to pay for whatever services you decided you needed. But</lj-cut> if you can make users of healthcare take a stake in their choices, you&#8217;re on the way to a better market for care.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/08/22/vacation-reading/">Vacation Reading</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-08-22T00:00:00-04:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">During my summer vacation, I read two interesting books. 
+
+The first book was the national bestseller <a  HREF="http://www.freakonomics.com/">Freakanomics</a> by Steven Levitt and Stephen Dubner. The second book was <a HREF="http://www.languagepolice.com/">The Language Police</a> by Diane Ravitch.
+<lj-cut>
+Today, I&#8217;ll talk about Freakanomics. In my next posting I&#8217;ll discuss The Language Police.
+
+Freakanomics has been heralded as a groundbreaking examination and rebuttal of the conventional wisdom found everywhere. I must say, I really enjoyed the book. But, I&#8217;m really quite frightened. 
+
+I&#8217;m not frightened because the book was particularly insightful. And it&#8217;s not the implications of any of Levitt and Dubner&#8217;s observations that alarm me. In fact, once you apply rational thought to observations of social phenomena, most of the conclusions in this book just simply make sense. 
+
+What bothers me is the reaction to this book. Critics everywhere are beside themselves. Steven Levitt is evidently some kind of hero (or rogue economist) because he examined facts, analyzed data, and drew logical conclusions about topics that people typically fail to explore because they are uncomfortable. Since when do you get to be a hero for telling the truth?
+
+I suppose it took bravery to ask the diffcult questions asked in the book in the first place. Unfortunately, the truth of the matter is that Levitt and Dubner are among the last of a dying breed. They don&#8217;t decide the answer ahead of time and reverse engineer the data to fit their theory. Many of today&#8217;s scientists and statisticians have bastardized the scientific method such that it is easy to define data sets that will support any outcome. Or worse: with a single data set, different methods can be applied to support different outcomes. 
+
+I see evidence of this type of behavior every day in my professional career as an IT Strategist. Most heinously, I see reverse engineering in the area of software and project estimation. In future articles, I will explore this area of rampant fact-bending and mis-application of mathematical technique. 
+
+Now, back to Freakanomics. You should read it, but read it with a critical eye. The book makes no apologies for not drawing any overarching conclusions from the several related-but-not-in-an-obvious-way studies that are outlined in its chapters. Ironically, that is left as an exercise for the reader. Just be careful if you choose to arrange the facts in order to support whichever societal implications you find most emotionally pleasing. 
+</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/07/13/identity-theft-or-you-broke-it-and-i-have-to-pay-for-it/">Identity Theft&#8230; Or &#8220;You Broke It, and I Have to Pay for It?&#8221;</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-07-13T00:00:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Today, I received an email from my bank promoting their new Identity Guard service designed to help &#8220;protect&#8221; me from identity theft. For $12.99 a month, my bank proposes to monitor my credit reports and react quickly to any indication that my  personally identifiable information has been stolen and used without my permission.
+
+This is reactive. It&#8217;s alarmist. And it puts the burden on me, rather than on the companies that are doing a poor job protecting my data in the first place. I am annoyed. 
+<lj-cut>
+What if banks do a good job protecting my personal information in the first place instead? Most of the recent identity theft stories in the media relate to the large scale theft of personal information from banks, credit card issuers, online retailers, or transaction processors. 
+
+Yet when my credit is hijacked because a financial institution is lax with security measures, I pay for it by having to deal with the fallout. The banks do not. And they ought to.
+
+So to the banks and credit card issuers offering &#8220;Identity Guard&#8221; products, I say this: Step up to the plate and take some responsibility. Protect my data, and insist that all of your transaction processing partners do the same. Until they do that, I&#8217;m hanging on to my $12.99 a month. I&#8217;m not going to pay banks for doing a lousy job protecting personal information in the first place.
+
+If &#8220;Identity Guard&#8221; were free, I&#8217;d be more likely to accept it as a potential solution. But financial institutions, transaction processors, and other data collectors have created this problem for us. I&#8217;ve never seen a sign in a trinket shop that read, &#8220;If we break it, you bought it&#8230;&#8221; My bank shouldn&#8217;t say it either.
+
+
+</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/07/06/more-on-eminent-domain/">More on Eminent Domain</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-07-06T00:00:00-04:00" pubdate data-updated="true">Jul 6<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">It&#8217;s been a little over a week since I published my first story on Eminent Domain. I spent some time and energy deconstructing the philosophy of eminent domain, property rights, and capitalism. I concluded that the Supreme Court made a royal mistake when they allowed the New London Development Corporation to claim an acre of land from 7 holdout families in New London, CT. I still stand by that assertion, but I want to illustrate the other side of the issue. 
+<lj-cut>
+I do believe that Eminent Domain has its place. Consider the most recent news about <a HREF="http://www.cnn.com/2005/US/07/06/everglades.holdout.ap/index.html">a man in the everglades who held out</a> while the state wanted to restore the everglades using his property. In short, an ex-Navy SEAL (and a patiot, no doubt) was living a rural lifestyle on a 160-acre parcel of wetlands in the everglades. He had no electricity, no utilities, and was 40 miles from civilization. 
+
+In order to protect the everglades, Florida decided that they needed to run some bulldozers around his land, erect berms, dredge here and there, and generally screw up his rural lifestyle. In return for his 160-acres of swampland, he was paid $4.18 Million. That equates to roughly $26,125 per acre. To put that into perspective, the going rate for arable farmland in Iowa is between $10,000 and $20,000 per acre (if you can grow something on it). Now, I know that Iowa isn&#8217;t Florida, but as strange as it seems, I am heaving real trouble finding comparable lots. It seems that nobody has a bunch of swampland in Florida that they are willing to quote me a price on. 
+
+In any case, I think the reaction of Mr. Hardy (the ex-Navy SEAL multi-millionaire) to his forced relocation is particularly stunning: Jesse Hardy said he doesn&#8217;t know where he&#8217;ll go after his Dec. 1 deadline to move. &#8220;I&#8217;m just trying to enjoy every minute I can of what I have left out there,&#8221; he said. (CNN) 
+
+I think Mr. Hardy won&#8217;t have much trouble finding remote rural land. He could probably even find some in Florida. Failing that, he could relocate to West Virginia, where you can still get large tracts of land from MeadWestVaCo for a pittance. He could move to Alaska where they actually pay you to live there (residents receive a royalty check from oil companies every year.) Both of these states will allow you to live in a clapboard house. But, it&#8217;s cold there. Perhaps west Texas would be more suited to Hardy&#8217;s love for hot weather and dangerous creatures. You can still get cheap land there too. 
+
+What I am getting at is that in this case, the state had a legitimate public use for the land in question, and paid what appears to me to be a more than fair market value. Further, this guy has enough money to live where ever he wants, from Manhattan to just outside Denali National Park. Yet he&#8217;s trying to portray himself as a martyr who has been run over by the government. 
+
+Fair enough. He&#8217;s got to move and that is lousy. But the people who got the short end of the stick are the middle class landowners in New London, Ct, who are going to be paid $100,000 for a postage stamp sized house. These people will then be forced to watch New London Development Corporation build a Wal-Mart on their land, and make a fortune doing it. 
+
+</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/06/27/eminently-wrong/">Eminently Wrong.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-06-27T00:00:00-04:00" pubdate data-updated="true">Jun 27<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><b>em·i·nent</b> (m-nnt) adj. Towering or standing out above others; prominent: an eminent peak. 
+<b>do·main</b> (d-mn) n. A territory over which rule or control is exercised. 
+
+&#8220;The true foundation of republican government is the equal right of every citizen in his person and property and in their management.&#8221; <i>&#8211;Thomas Jefferson to Samuel Kercheval, 1816. </i>
+
+The only eminent thing about the Supreme Court&#8217;s activities last week is how prominently wrong their decision on Eminent Domain was for this country. They have made a particularly distinguished mistake. An outstanding travesty of justice. Indeed, they&#8217;ve hurt us more than the last ten policy mistakes combined. 
+<lj-cut>
+In case you missed the story, the town of New London has condemned the property of several homeowners in a well maintained, middle class neighborhood in order to clear the way for a private redevelopment consisting of townhomes, condominiums, and offices. After lengthy negotiations, the owners refused to sell their homes and businesses to the developer, and that developer had the government invoke eminent domain. This is one of the first examples of the government taking from one private party, and giving to another private party for a development project. 
+
+My good friend, talented author, master story-teller, and fellow thinker <lj user="stephdray"> had <a HREF="http://www.livejournal.com/~stephdray/246299.html?mode=read">a few things to say</a> about the recent Supreme Court Decision on Eminent Domain. I must say, I agree with Steph, as you can see in my comment to her journal entry. 
+
+Countries that accumulate economic wealth generally have several distinct characteristics. There are several characteristics that I consider the most important: 
+<ol>
+<li> An economic systems that rewards and promotes competence and performance
+<li> A government that establishes a set of rules that are fair, knowable, and generally not corrupt. 
+<li> A suitable climate and geography to facilitate trade. 
+<li> Access to education and other mechanisms for skills improvement
+<li> Protection of private property rights, both real property and intellectual property
+</ol>
+
+These aren&#8217;t just my crazy ideas. The <a HREF="">National Center for Policy Analysis</a> agrees, along with <a HREF="http://www.uni-kiel.de/ifw/pub/kap/2003/kap1163.pdf">Bernhard Heitger</a> of the Kiel Institute for World Economics. Classical economists like Adam Smith and Keynes didn&#8217;t just think property rights were an important element of an economic policy, but rather an <b>assumed pre-requisite</b>. That is, without property rights, you don&#8217;t have a functional capitalist economy. You have something else.  
+
+Peter Boettke, of the Viginia Institute, says in <a HREF="http://www.virginiainstitute.org/viewpoint/2005_04_2.html">this article</a> that there are four important reasons for private property rights: 
+<ul>
+<li>Recognized private property rights provide the legal certainty necessary for individuals to commit resources to ventures. The threat of confiscation, by either private individuals or public officials, undermines confidence in market activity and limits investment possibilities. 
+<li> Clear property rights tend to make decision makers pay close attention to resource use and the discounted value of the future employment of scarce resources. Absent private property rights, economic actors will tend to be short-sighted in their decision making and not conserve resources over time. 
+<li> Property rights are the basis of exchange and the extension of ownership to capital goods provides the basis for the development of financial markets that are essential for economic growth and development. 
+<li> Secure private property rights, as indicated in the above quote by Thomas Jefferson, is the basis for limited and civilized government. The elimination of arbitrary confiscation and the establishment of regular taxation at announced rates enables merchants to calculate the present value of investment decisions and pass judgment on alternative allocations of capital. 
+</ul>
+
+The thinkers mostly agree, which is a rare occurence, that private property is a central pillar of capitalism. It is also a crucial element of The American Dream. In this case, do the needs of the many really outweigh the needs of the few? Or, perhaps more appropriately, are we <i>really</i> concerned with the needs of the many here? Or with the needs of the rich?
+
+No matter what the rationalization, it seems to me that taking someone&#8217;s only valuable asset, while paying an unfair market rate (because the property is &#8220;blighted&#8221;), then giving it to a developer who will probably make 30 or 40 times the price paid from the project is an ethical travesty. It doesn&#8217;t matter that it&#8217;s legal. It&#8217;s unethical no matter how you slice it. That&#8217;s probably why the &#8220;moral values&#8221; crew is speaking up against it. 
+
+In the liberal state of Maryland, The Rouse Company was forced to build Columbia, MD around the properties of holdout families that refused to sell their land. Columbia, MD did just fine, and the holdout families either coexist peacefully or have cashed out at better market rates. And The Rouse Company still got rich beyond belief.
+
+The Supreme Court, however, has handed developers a shortcut. Why would any big developer even try to negotiate a fair price with a landowner now? If I want to build 100 houses on your grandmother&#8217;s farm, why wouldn&#8217;t I just try to get my County Executive to condemn your family farm and cut out the pain of negotiating with you? 
+
+Don&#8217;t worry. You&#8217;ll get fair market value. 
+
+</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/06/16/the-cognitive-science-behind-racial-bias/">The Cognitive Science Behind Racial Bias.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-06-16T00:00:00-04:00" pubdate data-updated="true">Jun 16<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I read three interesting articles today. One is an old article, but I thought it was spot-on in pointing out that often we have a conscious attitude of racial tolerance, while harboring an unconscious racial bias without even knowing it. The second article is a more recent publication that reinforces the findings of the first: that we have some built in racial discrimination processing logic in our brains. That last article says to me that this &#8220;built-in&#8221; logic wasn&#8217;t just put there by our maker: social and cultural factors put it there, and that same mechanism can take it back out. 
+
+<lj-cut text="The Articles">
+<a HREF="http://www.sciencedaily.com/releases/2000/09/000913203757.htm
+">NYU/Yale Research Team Explores Neural Basis of Racial Evolution</a>
+
+<a HREF="http://www.sciencedaily.com/releases/2004/12/041208231237.htm">Brain Activity Reflects Complexity Of Responses to Other-race Faces</a>
+
+<a HREF="http://www.sciencedaily.com/releases/2005/02/050204212209.htm">New Study Suggests Race Fear Isn&#8217;t Hard Wired</a>
+
+While I think that the studies may have the ill-effect of giving the unenlightened (i.e. the &#8220;Davids&#8221; from <a HREF="http://www.stirfryseminars.com/pages/coloroffear.htm">The Color of Fear</a>) a hook to hang their white guilt on, the last article shows that perhaps the key to undoing the cognitive damage of race bias lies in actively retraining your brain to recognize people as individuals, rather than members of a class or race. That&#8217;s something that sounds reasonably easy to do, but I haven&#8217;t found any studies yet where someone has tried to measure the effectiveness.  
+</lj-cut>
+So as an MBA student, this raises an interesting question. When do we generalize and when do we individualize? It is a tough lesson to learn in MBA school. We take the management lessons from diversity and ethics courses: &#8220;Diversity is important. It is an asset. People deserve respect.  Generalizations about people are dangerous.&#8221; 
+
+Then we go over to a marketing class where we learn how to sell useless widgets to &#8220;black mothers between the ages of 21 and 35 with teenagers in the home (!) &#8221; by speaking to certain emotional concerns of a generalized group of people. <lj-cut text="Read the rant">We can certainly say we know the difference between treating people like individuals who deserve respect and treating people like a market to be targeted, tapped, and harvested. But do we really know what that means? Marketers make outrageous statements sometimes. Even though there is demographic data to back those statements up, I think that the language they use creeps into the organizational culture. 
+
+Do you think the traditional marketing function reinforces certain biases people have about women, black people, or any of the other groups of people that marketers use to segment markets? Have you seen any effective material on how the marketing and management functions of an organization can be designed to clearly differentiate between targeted market segmentation and discrimination within the organization itself? 
+
+I think that MBA schools ought to discuss the relationship between organizational goals, ethical concerns, and social factors in more depth. How do we balance marketing strategy with management factors, operational concerns, financial strategy, and other organizational issues? The more I learn in B-school, the more it seems like running the business of any one organizational department is the easy part. Sitting on the senior leadership team and representing your department is easy too. In order to be a great executive, you have to have a broader skillset that knits all of the organizational factors together and finds the right balance. That&#8217;s what I&#8217;ll be looking for in my last few courses at <a HREF="http://www.loyola.edu/sellinger/">Loyola</a>. 
+</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/06/14/radios-changing-business-model/">Radio&#8217;s Changing Business Model</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-06-14T00:00:00-04:00" pubdate data-updated="true">Jun 14<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I have been reading quite a bit lately about the Radio industry. It&#8217;s a particularly interesting topic because the business model could potentially change based on technological advancements. Now, more than ever, audio broadcast technology is available to the average person. Podcasting, internet music streaming, and other technologies promise to empower more people to produce content the same way that the printing press and the Internet spread written knowledge.
+
+Invariably, this has people thinking about how to make money under the new paradigm.<lj-cut> <a HREF="http://blogs.businessweek.com/mt/mt-tb.cgi/885">Heather Green&#8217;s Blog</a> and <a Href="http://gigaom.com/2005/05/25/steve-jerry-and-the-yahoo-music-business-model/">Om Malik&#8217;s Blog</a> have an interesting examination of Yahoo Music&#8217;s new subscription service. Om Malik postulates that Yahoo Music could make a killing if they turned into an advertising-only service. I think Malik misses one key point, though: the interesting thing about the internet music model, as opposed to the broadcast model, is that the customer is the listener. 
+
+In over-the-air broadcasting, the advertiser is the customer, the audience is the product, and the individual listener is a supplier. Broadcast radio is all about giving away content &#8220;free&#8221; to listeners in order to supply them to advertisers. 
+
+Satellite radio, podcasts, and streaming music subscriptions seem to be more about pleasing the listener at an individual level. That is, treating them like a customer. 
+
+I haven&#8217;t seen any examples yet of a successful business model that merges the two concepts: &#8220;listener as customer&#8221; vs. &#8220;advertiser as customer.&#8221; I think that most subscription service listeners join because they want to be a customer instead of an audience to advertisers. 
+
+Though I haven&#8217;t thought all the way through the subtle differences in the mind of the customer, I think that&#8217;s exactly where the answer lies for a successful blend of the two revenue streams. That is, until we understand the psychology of the radio listener a little better, we can&#8217;t mix advertising and pay services. 
+
+After all, if HBO, Showtime, Cinemax, and other pay TV channels started running commercial advertisements, wouldn&#8217;t you rethink your $10 monthly payment for the service? It&#8217;s a tough problem to crack.
+
+For what it&#8217;s worth, in order to have a profitable advertising business in streaming media you need a lot of listeners. According to David Frerichs, founder of iM Networks: <a Href="http://www.rwonline.com/reference-room/special-report/03_Rwx_SMWfinal.shtml">&#8220;The reason that many of these stations aren&#8217;t profitable is simply because they&#8217;re not big enough. To create a profitable streaming radio business, you need about 10 million listener hours per month.” </a> I am betting that the introductory offers Yahoo is putting out there are aimed at building that critical mass.</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2005/06/08/innovation-and-ethics/">Innovation and Ethics</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2005-06-08T00:00:00-04:00" pubdate data-updated="true">Jun 8<span>th</span>, 2005</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I just finished a class in business school about managing technology and innovation. Though we studied a lot of interesting management theories and creative companies, the most fascinating and curious aspect of managing modern innovation is the ethical dimension. This topic is particularly relevant given many of todays conundrums in areas such as biotechnology, stem cell research, climate change, and data mining. 
+
+Primarily, ethicists give us two frameworks to use in evaluating ethical dilemmas: teleological and deontological. The teleological framework is <lj-cut>a utilitarian point of view. The ends justify the means. The needs of the many outweigh the needs of the few. On the other hand, deontological analysis is the opposite. That is, we must alway conduct ourselves according to certain moral standards, regardless of the outcome. Put another way, it&#8217;s not whether you win or lose, but how you play the game.  The difference between the teleological and deontological methods of ethical analysis rationalizes decisions into two distinct camps. To what extent, however, do innovative organizations fall into one camp or the other? I think they are driven by a blend of both, but with emphasis on the deontological. 
+
+Consider the innovative and wildly successful firm IDEO (http://www.ideo.com). This company is an example of one of the most exciting places to work today. If you saw the Nightline documentary on this company, you know that they place an amazing amount of power and emphasis on their people. You also know that their employees are among the best and brightest in the nation. For example, one product specialist has deferred entry to Harvard medical school for three years now because he&#8217;s having too much fun. Clearly, the way IDEO plays the game has a lot to do with their results. They&#8217;re winners. 
+
+I know of another technology firm that prides itself on the way it wins the game. The company values its people, making only those hires that are strategically relevant to the company. They turn down more business than they take because they want only the best people. Ramping up too fast introduces junk into the human capital pool. This company has amassed enough capital in reserve to survive a full year with no customers without cutting staff, and have articulated this as a core value of the organization. The core values of this organization are deontological in nature. It is not unheard of for people to suggest that the profits from a new product be donated to charity because the employee who had the idea for the product thought that was important. 
+
+As long as certain basic financial targets are met, it&#8217;s pretty easy to be all about the means to the end. This demonstrates the balance between the teleological and deontological. As long as we have a justifiable end, the means ought to be as morally bright as possible. 
+
+The most relevant deontological litmus test is the ever relevant Universalization Test. When making a decision, the deontologist must ask: &#8220;What if everyone else in the world made this same choice? Would the world be a better place? Would I want to live in it?&#8221; If the answer is bleak, then the choice might not be so good. 
+
+There is another dimension of ethics worth exploring, though it is related more to management than innovation. Too often today, it seems that rather than applying the universalization test to ethics questions, organizations instead ask themselves the <b>media question</b>. That is, “What would happen if the media found out we made this decision based on these criteria?” If we apply that ethical question test face value, perhaps we come up with such an answer as, “we’d be embarrassed, so we ought not do that.” Unfortunately, many organizations take this question as a starting point for scenario building and risk mitigation. This shows a bias in favor of the teleological, end-justify-the-means approach that is often found among the large organizations that have been wrought by scandal lately. To be certain, many of those organizations were being creative. But is it innovative to find a way around the norms and values of our culture to profit? Or does innovation demand that we play within a set of moral standards? 
+
+Therein lies to dilemma when we think about stem cells. There are certainly more than two sides to the issue. There are a lot of folks who believe we ought to be doing stem cell research. I happen to be one of those people. There are some other people, many of them democratic congressmen, who think that we ought to hold off on certain types of stem cell research because it isn&#8217;t safe. That&#8217;s a teleological point of view, and it&#8217;s certainly valid. Then, of course, you have the deontological position, which many people will equate with the Bush administration&#8217;s stance on the topic. The ultimate premise of the deontological position is, &#8220;It is not right to take one life in order to preserve another life.&#8221; That&#8217;s certainly a difficult assertion to argue with as a matter of policy. Given that the Bush adminstration has a very strong position on when life begins, their conclusions certainly make sendse. 
+
+But there are two tough questions that are raised by that position. First, when does life really begin. Is it at the time an egg is fertilized? Is it at quickening? Birth? Or at some nebulous biological milestone in between? My gut tells me it&#8217;s the last one. If you think it&#8217;s the first one, then you are certainly justified in opposing stem cell research. The even tougher question in my mind, though, is this: If it is NOT OK to take one life to save another, if life begins at egg fertilization, and if we must ban new stem cell lines from being created based on this moral code that we adhere to, then <b>why is it OK to experiment on the existing lines of stem cells?</b> Are those lives a sunk cost? Is it OK to benefit from what would have been a moral outrage simply because the damage is done? 
+
+When we make decisions about innovation based on moral standards, such as in the stem cell debate, whose ethical norms should we follow? One of the major problems with ethics in high technology is that the general public is easily swayed one way or another on topics that they know very little about. If you ask the average American about embryonic stem cell research, they are sure to have what they believe to be an informed opinion. If you ask those same individuals to draw an embryo, I suspect that more than 75% of them will draw you a fetus. That is, something that looks like a tiny, developing person with a brain, heart, lungs, and presumably consciousness. The debate over whether life begins at quickening, implantation, conception, birth, or some biological development milestone along the way is irrelevant if the people debating the issue don’t understand the basic biological process of reproduction. This topic leaves me with more questions to ponder than answers. 
+
+How do we equip ourselves to innovate, then, within the context of our cultural and ethical norms? How do we educate the public about the true nature of what we are trying to do? Is it possible to rationalize every decision we make with respect to innovation, or are some areas of research just not ethically viable? Certainly we have made mistakes. Nuclear energy is a good thing in my book, but nuclear weapons are an unconscionable legacy for which we will all have to pay someday. Would it have been possible to have one without the other, given the diversity in moral values throughout the world? If the United States had not developed and used nuclear weapons, but only nuclear energy, wouldn’t someone else in the world have created the atomic bomb? Would it have been moral not to develop the technology to deter others from using it? Is it moral that we killed so many people in Japan to demonstrate why nuclear weapons are such a bad idea?
+
+I think the answer to these ethical questions lie in a gray area. They are murky, to be sure. The traditional ethical frameworks don’t always apply when we talk about innovation. But to be sure, it helps to go through each method of analysis in order to have a more informed view of the issues. Perhaps Virtue Ethics has the answer. I certainly don&#8217;t.</lj-cut>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/6/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

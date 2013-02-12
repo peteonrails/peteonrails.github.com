@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How I became convinced to use db:populate instead of db:migrate with inline data seeding, and why you should too. - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="There&#8217;s a lot of established debate and best practice around how to populate your database with the initial reference data it needs in order to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2009/11/11/how-i-became-convinced-to-use-dbpopulate-instead-of-dbmigrate-with-inline-data-seeding-and-why-you-should-too/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">How I Became Convinced to Use Db:populate Instead of Db:migrate With Inline Data Seeding, and Why You Should Too.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-11-11T00:00:00-05:00" pubdate data-updated="true">Nov 11<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><img class="alignright size-thumbnail wp-image-178" title="iStock_000002051165XSmall" src="http://blog.peteonrails.com/wp-content/uploads/2009/11/iStock_000002051165XSmall-150x150.jpg" alt="iStock_000002051165XSmall" width="150" height="150" />There&#8217;s a lot of established debate and best practice around how to populate your database with the initial reference data it needs in order to operate. I&#8217;m not going to rehash that here. If you&#8217;re interested in the options available for seeding data, <a href="http://railspikes.com/2008/2/1/loading-seed-data">read Luke Franci&#8217;s article on Rails Spikes.</a> Many people I work with seem to like &#8220;db:populate&#8221; which, while very nice and flexible, always seemed like a little bit of overkill to me.
+
+I was always in favor of seeding short reference data right in the migration like this:
+<pre lang="ruby">class CreateTestScopes < ActiveRecord::Migration
+  def self.up
+    create_table :test_scopes do |t|
+      t.string  :name
+      t.timestamps
+    end
+
+    %w(first second third).each do |e|
+       TestScope.create(:name => e)
+     end
+  end
+
+  def self.down
+    drop_table :test_scopes
+  end
+
+end</pre>
+JUST TO BE CLEAR: we&#8217;re talking about production reference data that the application requires in order to run. We are not talking about TEST data, which belongs in mocks or (gasp) fixtures. A really good example of legitimate production seed data is the creation of the out-of-box Administrative user.
+
+And if I had to update my reference data, I was also a fan of including it in the migration. After all, it&#8217;s reference data, not test data, fixture data (eww!) or user data.
+<pre lang="ruby">class CapitalizeTestScopes < ActiveRecord::Migration
+  def self.up
+    TestScope.all.each { |t| t.name = t.name.capitalize; t.save! }
+  end
+
+  def self.down
+    puts "Can't undo, but don't freak out!"
+  end
+end</pre>
+Later, I decided I wanted a sort-order column and decided to add something like this:
+<pre lang="ruby">class AddSortOrderToTestScopes < ActiveRecord::Migration
+  def self.up
+    add_column :test_scopes, :sort_order, :integer
+  end
+  # omit self.down ....
+end
+
+class TestScope &lt; ActiveRecord::Base
+  default_scope :order => "sort_order"
+end</pre>
+And here&#8217;s the crux of the issue:
+
+By adding a column that the model depends on in the default_scope, we&#8217;ve made it a requirement for the sort_order column to be present in order to load and query the model object. That&#8217;s fine for me. This migration will run with no errors on my workstation, provided that I ran db:migrate immediately prior to my latest changeset.
+
+However, if you want to come up to speed on my project, you cannot do this:
+<pre lang="bash"> bash# rake db:setup
+ bash# rake db:migrate</pre>
+Because here&#8217;s what will happen:
+<pre lang="bash">==  CapitalizeTestScopes: migrating ===========================================
+rake aborted!
+An error has occurred, this and all later migrations canceled:
+
+SQLite3::SQLException: no such column: sort_order: SELECT * FROM "test_scopes"  ORDER BY sort_order</pre>
+Since we&#8217;re using the ActiveRecord object to do our reference updates (which is A GOOD THING, since we get validations and abbreviated syntax), we can&#8217;t have dependencies in the default scope that are not defined before the first use of the ActiveRecord object in our migrations.
+
+A lot of folks argue that migrations are not reliable and shouldn&#8217;t be the way you&#8217;re creating your schema in the first place. To that, I respectfully say, &#8220;You&#8217;re wrong.&#8221;
+
+It is only because we developers make boneheaded mistakes like the one outlined above that we cannot rely on migrations to rebuild our schema incrementally from migrations. Rather than be boneheaded, we should <strong>be awesome instead</strong> and fix the migration dependencies by moving the data seeding out to a db:populate or other rake task that operates on a completely built data structure. (I know: this is not in line with the movement toward schema.rb as the authoritative source of the database structure. I&#8217;m not up for arguing that point today, but I will argue it.)
+
+The answer is to do this:
+<pre lang="ruby"># file: db/migrate/X_create_test_scopes.rb
+class CreateTestScopes < ActiveRecord::Migration
+  def self.up
+    create_table :test_scopes do |t|
+      t.string  :name
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :test_scopes
+  end
+end
+
+# File: db/populate/001_seed_scopes.rb
+%w(first second third).each do |e|
+   TestScope.create(:name => e)
+ end</pre>
+Then, when you have to capitalize your model data:
+<pre lang="ruby"># File: db/populate/002_capitalize_scopes.rb
+TestScope.all.each { |t| t.name = t.name.capitalize; t.save! }</pre>
+And then when you add the sort order:
+<pre lang="ruby">class AddSortOrderToTestScopes < ActiveRecord::Migration
+  def self.up
+    add_column :test_scopes, :sort_order, :integer
+  end
+  # omit self.down ....
+end
+
+class TestScope < ActiveRecord::Base
+  default_scope :order => "sort_order"
+end
+
+# file db/populate/003_seed_sort_order.rb
+TestScope.each_with_index { |e, i| e.sort_order = i; e.save! }</pre>
+Voila! You can run db:migrate with a fresh database and have no errors.
+
+So far, when I encounter an issue that prevents me from rebuilding my complete schema incrementally using db:migrate, it&#8217;s been a Rails Smell. I haven&#8217;t found a legitimate reason why migrations can&#8217;t be sorted out to build cleanly every time. If you can&#8217;t rebuild your database incrementally using migrations, it&#8217;s likely that you&#8217;re doing something wrong.
+
+I ignored this debate for a long time because it didn&#8217;t really affect me. Don&#8217;t be like me. Save yourself the trouble of unwinding your migration mess and use an outside seeding package like db:populate.
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-11-11T00:00:00-05:00" pubdate data-updated="true">Nov 11<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2009/11/11/how-i-became-convinced-to-use-dbpopulate-instead-of-dbmigrate-with-inline-data-seeding-and-why-you-should-too/" data-via="" data-counturl="http://peteonrails.github.com/blog/2009/11/11/how-i-became-convinced-to-use-dbpopulate-instead-of-dbmigrate-with-inline-data-seeding-and-why-you-should-too/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/04/03/myquotable-source-code-available-again/" title="Previous Post: MyQuotable source code available again">&laquo; MyQuotable source code available again</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/11/14/votefu-is-now-available-on-gemcutter/" title="Next Post: VoteFu is now available on GemCutter">VoteFu is now available on GemCutter &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

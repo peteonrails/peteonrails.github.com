@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Adding Multiple Attachements to a Model in one View - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="AttachmentFu is a great plugin. It&#8217;s heavily used all over the place to upload images to a Rails app. It&#8217;s also good with other file &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/2008/04/30/adding-multiple-attachements-to-a-model-in-one-view/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Adding Multiple Attachements to a Model in One View</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-30T00:00:00-04:00" pubdate data-updated="true">Apr 30<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">AttachmentFu is a great plugin. It&#8217;s heavily used all over the place to upload images to a Rails app. It&#8217;s also good with other file types.
+
+I had a requirement to provide users with the ability to set up an entity (call it a Batch), then upload a number of CSV files to that batch. I used AttachmentFu, FasterCSV, and some Multi-Model editing forms to make the trickery work.
+
+Before starting, I set up the AttachmentFu plugin. If you have never done this before, <a href="http://clarkware.com/cgi/blosxom/2007/02/24#FileUploadFu"> Mike Clark&#8217;s Tutorial</a> is a good place to start. Install the plugin and take note of how you have to set up your Attachment model.
+
+Then, I had to set up a Multi-model editing form. If you haven&#8217;t done this before, then you should read Ryan Bates&#8217; tutorial on <a href="http://railsforum.com/viewtopic.php?pid=3713"> setting up multiple models in one view</a>.  In this situation, I had to modify some of the steps because we&#8217;re dealing with File Attachments, not Task objects. Here is what I did:
+
+First I created my &#8220;Batch&#8221; object.
+<pre lang="bash" line="1">
+script/generate migration Batch user_id:integer name:string
+</pre>
+
+Then I created my &#8220;Attachment&#8221; object.
+<pre lang="bash" line="1">
+script/generate migration Attachment
+</pre>
+
+I use Oracle. In order to make AttachmentFu work, I renamed &#8220;size&#8221; to &#8220;filesize&#8221;
+<pre lang="ruby" line="1">
+... In 002_create_attachment.rb
+def self.up
+  create_table :attachments do |t|
+  t.integer    :parent_id # foreign key to :batches
+  t.string     :content_type, :filename, :thumbnail
+  t.integer    :filesize, :width, :height
+end
+</pre>
+
+Then, in my Batch model, I added the Multi-Model handling code.  My method differs from the Rails Recipe because you cannot update an attachment once you upload it, only delete it. In the Update action, for each attachment on the model, we check to see where there is an attribute containing the ID of the attachment
+<pre lang="ruby" line="1">
+# If there is not an ID in an attribute, we delete the attachment.
+# ... In batch.rb
+has_many   :attachments, :foreign_key =&gt; "parent_id", :dependent =&gt; :destroy
+validates_associated    :attachments
+
+def new_attachment_attributes=(attrs)
+  attrs.each { |attr| attachments.build(attr) }
+end
+
+def existing_attachment_attributes=(attrs)
+  attachments.reject(&amp;:new_record?).each do |attach|
+    attachments.delete(attach) unless attrs[attach.id.to_s]
+  end
+end
+
+def save_attachments
+  attachments.each { |attach| attach.save(false) }
+end
+</pre>
+
+Then I set up the Attachment model to handle the AttachmentFu-ery.
+
+<pre lang="ruby" line="1">
+class Attachment < ActiveRecord::Base
+  belongs_to     :batch
+  has_attachment :storage =&gt; :file_system     # Or S3, or DB, or whatever
+  validates_as_attachment
+
+  ## Patch to make this AttachmentFu Model object work with Oracle.
+  def size
+    self.filesize
+  end
+
+  def size=(bytes)
+    self.filesize = bytes
+  end
+end
+</pre>
+
+Now I needed to build the view and controller support. To keep the app mostly RESTful, we let the standard &#8220;Attachment&#8221; controller be built by the scaffolding system. Since we will be primarily working with Attachments in the &#8220;Batch&#8221; view, though, I&#8217;ve omitted those details.
+
+Here is the additional controller code in batch_controller.rb:
+
+<pre lang="ruby" line="1">
+# GET /batches/new
+def new
+  @batch = Batch.new
+  @batch.attachments.build
+end
+
+def update
+  params[:batch][:existing_attachment_attributes] ||= {}
+
+  @batch = Batch.find(params[:id])
+
+  respond_to do |format|
+    if @batch.update_attributes(params[:batch])
+       flash[:notice] = 'Your Batch was updated successfully.'
+       format.html { redirect_to batch_url(@batch) }
+       format.xml  { head :ok }
+    else
+       format.html { render :action =&gt; "edit" }
+       format.xml  { render :xml =&gt; @batch.errors.to_xml }
+    end
+  end
+end
+</pre>
+What&#8217;s left? Setting up the views. We leave the scaffolded &#8220;index&#8221; action for the Batch view in place. Attachments aren&#8217;t relevant in that view. But in the &#8220;Edit&#8221; and &#8220;New&#8221; views, we need to create a custom form that can handle attaching files in addition to setting up the Batch model object.
+
+Step 1, make the Edit and New actions point to a shared form:
+
+<pre lang="html" line="1">
+<!-- Contents of views/batches/new.html.erb
+and views/batches/edit.html.erb
+-->
+<div class="greybox"><%= render :partial =>; 'form' %></div>
+</pre>
+Then, we set up the shared form in a partial like so:
+
+<pre lang="html" line="1">
+<h1>Schedule A Batch</h1>
+<!-- views/batches/_form.html.erb: error display code omitted -->
+  <% form_for(@batch, :html => { :multipart => true }) do |f| %>
+  <strong>Name:</strong> <%= f.text_field :name %>
+  <div id="attachments"><%= render :partial => "attachment", :collection =>  
+  @batch.attachments%></div>
+  <%= add_attachment_link "Add a File" %>
+  Total Line Count: <%= @batch.prod_line_count %>
+
+  <input name="batch[user_id]" type="hidden" value="<%= @user.id %>" />
+
+  <%= submit_tag "Save Changes" %&gt; or &lt;%= link_to 'Cancel', batches_path %>
+
+  <% end %>
+</pre>
+
+The code above renders the primary Model object, and then renders the associated attachments using the &#8220;_attachment&#8221; partial. Let&#8217;s take a look at that code:
+
+<pre lang="html" line="1">
+<div id="attachments" class="attachment"><% new_or_existing = attachment.new_record? ? 'new' : 'existing' %>
+  <% prefix = "batch[#{new_or_existing}_attachment_attributes][]" %>
+  <% fields_for prefix, attachment do |af| -%>
+
+  <strong>Attached File:</strong>
+  <% if attachment.new_record? %>
+
+
+  <%= af.file_field :uploaded_data %>
+  <% else %>
+  <%= af.hidden_field :id %>
+  <%= attachment.filename %>
+  <%= link_to_function "remove", "$(this).up('.attachment').remove()" unless params[:action] == "show"%>
+  <% end %>
+
+  <% end -%>
+</div>
+</pre>
+This sets the front end up to show the attached files, and provide a link to delete each on on the front end using javascript (unless we are being rendered in the &#8220;show&#8221; action. We&#8217;ll refactor that piece of bad juju later).
+
+The last piece of work to do is to set up the &#8220;show&#8221; action to display the child records. This isn&#8217;t hard. There is no need to modify the default scaffolded view. Just add the partial to show the attachments:
+
+<pre lang="html" line="1">
+<-- Add to views/batches/show.html.erb -->
+<div id="attachments"><%= render :partial => "attachment", :collection => @batch.attachments%></div>
+</pre>
+
+That&#8217;s it. You still have an application that responds RESTfully to Batch and Attachment requests, but when you are a person in front of a browser, you can attach multiple files to your Batch object.
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-30T00:00:00-04:00" pubdate data-updated="true">Apr 30<span>th</span>, 2008</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://peteonrails.github.com/blog/2008/04/30/adding-multiple-attachements-to-a-model-in-one-view/" data-via="" data-counturl="http://peteonrails.github.com/blog/2008/04/30/adding-multiple-attachements-to-a-model-in-one-view/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2005/11/06/health-care-wal-mart-hsas-cdh-plans-and-the-future-of-benefits-in-this-nation/" title="Previous Post: Health Care, Wal-Mart, HSAs, CDH plans, and the future of benefits in this nation.">&laquo; Health Care, Wal-Mart, HSAs, CDH plans, and the future of benefits in this nation.</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2008/04/30/startup-lessons/" title="Next Post: Startup Lessons">Startup Lessons &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

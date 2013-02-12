@@ -1,0 +1,706 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="I liked Dr Nic&#8217;s github badge so much that I wrapped a sidebar plugin around it for Typo users. You can get it from github. Or install it into &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://peteonrails.github.com/blog/page/6/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:peteonrails.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/10/github-sidebar-plugin-for-typo/">GitHub Sidebar Plugin for Typo</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-10T00:00:00-04:00" pubdate data-updated="true">May 10<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I liked <a href="http://drnicwilliams.com/2008/05/03/github-badge-for-your-blog/trackback">Dr Nic&#8217;s github badge</a> so much that I wrapped a sidebar plugin around it for Typo users. You can <a href="http://github.com/peteonrails/githubsidebar/tree/master">get it from github.</a>
+
+Or install it into typo like this:
+<pre name="code" class="ruby">
+# cd typo/vendor/plugins 
+# git clone git://github.com/peteonrails/githubsidebar.git github_sidebar
+</pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/10/github-javascript-badge/">GitHub Javascript Badge</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-10T00:00:00-04:00" pubdate data-updated="true">May 10<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Dr. Nic has released a <a href="http://drnicwilliams.com/2008/05/03/github-badge-for-your-blog/"> javascript based badge for GitHub</a>. While I generally like to keep my sidebars clean because most readers just ignore the cruft in there, this badge is really useful for me. Plus, as the author points out, you get at least a 100% boost in coolness. 
+
+I like the badge, but it&#8217;s a little less than seamless looking in my sidebar. He&#8217;s made the <a href="http://github.com/drnic/github-badges/tree/master">source code</a> available on github (of course), so I could download it and style it to my liking, but I&#8217;d much rather benefit from his future releases without having to re-download and merge. 
+
+Specifically, I&#8217;d like to be able to suppress the header the badge prints, so I can wrap it into a Typo plugin for a better look. 
+
+Working on a patch now to do just that. 
+
+ 
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/08/ruby-gem-threaded-collections-process-collections-over-many-threads/">Ruby Gem - Threaded Collections: Process Collections Over Many Threads</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-08T00:00:00-04:00" pubdate data-updated="true">May 8<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">I often have to iterate over a collection and perform some remote, or long running task on each member of the collection.
+
+Threaded Collections is a package for iterating through collections over multiple threads. With large collections, sometimes it can be more efficient to process a collection in parallel, provided that the collected items don&#8217;t have a interdependencies, or need to be processed in a specific order. 
+
+Usage: 
+<pre lang="ruby" line="1">
+require "threaded_collections"
+
+threadcount = 2
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+tps = ThreadedCollectionProcessor.new(arr)
+tps.process(2) do |thread_id, item| 
+  puts "Thread #{thread_id} processed item: #{item}" 
+  sleep 1
+end
+
+</pre>
+
+I abstracted this pattern from a web services client that posted items from a collection, but
+each request took a second to process. The remote service had plenty of threads available, so
+I parallelized the task with this pattern. 
+
+I have no plans to break the interface but I do plan to make two major enhancements: 
+
+<ol>
+<li>Make it possible to mix this functionality in to the Ruby iterators, so you don&#8217;t have create the ThreadedCollectionProcessor.</li>
+<li>Make it work with fibers and processes in addition to threads. </li>
+</ol>
+ 
+If you want to check it out, you can get the source from <a href="http://github.com/peteonrails/threadedcollections/tree/master">the threadedcollections github site</a>. 
+
+To install the gem without git:
+<pre lang="bash" line="1">
+bash# sudo gem install peteonrails-threaded-collections --source=http://gems.github.com
+</pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/07/dry-controllers-which-framework-do-you-use/">DRY Controllers: Which Framework Do You Use?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-07T00:00:00-04:00" pubdate data-updated="true">May 7<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">RESTful applications built with script/generate have a lot of repetitive code. Each generated controller will define default &#8220;index&#8221; &#8220;create&#8221; &#8220;new&#8221; &#8220;update&#8221; and &#8220;destroy&#8221; methods that looks similar from controller to controller. 
+
+There are at least FOUR plugins that aim to DRY up RESTful controllers each with their own benefits and weaknesses: 
+
+<ol>
+ <li><a href="http://nex-3.com/posts/54-make_resourceful-0-2-0">make_resourceful</a> - There&#8217;s a great <a href="http://railscasts.com/episodes/92">Railscast on make_resourceful.</a></li>
+ <li><a href="http://jamesgolick.com/2007/10/19/introducing-resource_controller-focus-on-what-makes-your-controller-special">resource_controller</a> Provides a super-class controller that you inherit from. Pretty sweet at handling nested resources&#8230;..but don&#8217;t confuse it with&#8230; </li>
+ <li><a href="http://agilewebdevelopment.com/plugins/resources_controller">resources_controller</a> &#8211; which uses a declarative syntax instead of a superclass. I like seeing &#8220;resources_controller_for :foos&#8221; in my code. </li>
+ <li><a href="http://soylentfoo.jnewland.com/articles/2007/09/17/resource_this-dry-rails-resource-controllers">resource_this</a> &#8211; Heavily uses before_filters, if you&#8217;d prefer to see things that way.</li>
+</ol>
+
+I am working on a longer, more in-depth comparison of the available frameworks. but I&#8217;ve gotta tell you, a &#8220;winner&#8221; needs to shake out of this list. Having four very strong and useful, but VERY DIFFERENT, ways to DRY up controllers is not beneficial. 
+
+Do you remember when there were six ways to Paginate records in a Rails app? Now we use &#8220;will\_paginate&#8221;, and that&#8217;s how it&#8217;s done. Everyone knows how to use will_paginate, and it&#8217;s terse, well tested, and well supported. 
+
+So, which framework do you use? Let me know. I&#8217;m interested. 
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/06/integrating-with-services-that-exhibit-the-java-timezone-issue/">Integrating With Services That Exhibit the Java Timezone Issue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-06T00:00:00-04:00" pubdate data-updated="true">May 6<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><a href="http://blog.peteonrails.com/2008/05/06/converting-to-and-from-unix-java-time-epoch">In my last post</a>, I described an XML over HTTP service written in Java that I have to integrate with. I expressed a minor and general annoyance at the fact that the developers of this service specify that a &#8220;DateTime&#8221; parameter be specified in &#8220;milliseconds since the epoch&#8221;. 
+
+There is another typical problem with Java services that isn&#8217;t always as evident. 
+
+When Congress decides to change the Daylight Savings Time switch dates, the JVM typically needs to be patched separately from the OS it is running on. And this <strong>never happens</strong>. 
+
+So, if you are passing a message to a Java service gateway with a parameter like &#8220;delivery time&#8221; specified in &#8220;milliseconds since epoch&#8221;, and you think it&#8217;s Daylight Savings Time, but the Java service thinks it&#8217;s &#8220;Standard Time&#8221;, then your message will be delivered an hour late. 
+
+I usually deal with that case ad-hoc by specifying a variable in a YAML file, like this:
+
+<pre lang="ruby" line="1">
+tz-fix: true
+</pre>
+
+And then in my code like this: 
+<pre lang="ruby" line="1">
+  # Read in my config
+  @@c = YAML.load_file(File.join(File.dirname(__FILE__), "myapp.yml"))   
+# ...
+  millis = millis - (60*60*1000) if @@c["tz-fix"]
+</pre>
+
+If the remote service talks in &#8220;seconds since epoch&#8221;, I drop the &#8220;* 1000&#8221;. 
+
+Good luck. 
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/06/converting-to-and-from-unix-java-time-epoch/">Converting to and From Unix / Java Time (Epoch)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-06T00:00:00-04:00" pubdate data-updated="true">May 6<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Working in telecom, I have to integrate my Rails and plain Ruby apps with Java or Unix based systems running on remote hosts. Most often these systems are running remotely and are accessed via an XML-over-HTTP interface (no SOAP, no REST, blah&#8230;).
+
+I&#8217;ve found that one of the most infuriating things that UNIX and Java &#8220;roll your own web service&#8221; writers do is specify &#8220;time&#8221; fields as &#8220;seconds since the epoch&#8221;. WORSE: Many Java service writers specify time fields as &#8220;milliseconds since the epoch&#8221;. 
+
+Come on, now, people? It&#8217;s a web service! Do you really think I care about accuracy in milliseconds?
+
+I won&#8217;t go into a rant about this. Suffice it to say: I Find This BS To Be Lazy. It works that way so that the server software doesn&#8217;t have to do any complicated date parsing or conversions. 
+
+Fortunately, Ruby makes it easy to deal with if you know the right methods to use. Here&#8217;s how to convert to a UNIX or Java internal-time:
+
+<pre lang="ruby" line="1">
+rubytime = Time.new  # => Tue May 06 11:11:05 -0400 2008
+
+# .. Convert from Ruby time to Unix time. 
+unixtime = rubytime.to_i            # 1210086665
+javatime = rubytime.to_i * 1000  # 1210086665000 
+</pre> 
+
+What about converting the other way? The example above are converting the &#8220;less precise&#8221; Ruby time (no milliseconds) into equally or more precise time formats. What do you do when you have a &#8220;milliseceonds since epoch&#8221; time and you want to use it in Ruby, but preserve the sub-second precision?
+<pre lang="ruby" line="1">
+# Add just over a half second to the time used above
+millis   = 1210086665555  
+
+# adding .0 preserves subsecond accuracy
+precise = Time.at(millis / 1000.0) 
+
+precise.to_i            #  1210086665
+precise.to_f            #  1210086665.555
+precise.to_f * 1000  # 1210086665555.0
+</pre>
+
+Now. Go convince all those legacy Java and Unix service writers to stop specifying &#8220;Epoch Time&#8221; in their interfaces! It&#8217;s Just Plain Lazy!
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/03/fixed-standard_issue-theme-for-proper-code-formatting/">Fixed Standard_issue Theme for Proper Code Formatting</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-03T00:00:00-04:00" pubdate data-updated="true">May 3<span>rd</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Alright. The Typo 5.x Standard Issue theme (which I really like, so much that I switched from Scribbish) does not account for the styles used by typo:code macros. 
+
+After much headache trying to get Typo to include the typocode themes in minimal.css while rendering themes (so that code would render nicely in any theme that I choose to use), I gave up. Really, I&#8217;m not sure I want to override typocode styles in every theme anyway, because someone might come up with an even better set of styles. 
+
+So instead, I&#8217;ve patched themes/standard_issue/stylesheets/application.css to include the typocode styles. As you can see, code is rendering much more bueno now. 
+
+Thanks <a href="http://www.acts-as-blogr.com">Brent</a>, for beating me up enough to invetigate a better theme. 
+
+If you use Standard Issue and want the updated stylesheet, grab it from <a href="/stylesheets/theme/application.css">my site.</a> 
+
+Now, I am working on a bug in the ruby formatting that displays line numbers incorrectly, like this: 
+
+<img src="/wp-content/uploads/images/linenumber.jpg"/>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/02/code-highlighting-in-typo/">Code Highlighting in Typo</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-02T00:00:00-04:00" pubdate data-updated="true">May 2<span>nd</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Code Highlighting in Typo is awful, cumbersome, and a pain. I am currently running this blog on Typo 5.0.3, and when I write an article using typo:code snippets using LivePreview, here is what I see:   </p>
+<p>
+<img src="/wp-content/uploads/images/typoexample.jpg">
+</p>
+
+<p>
+But then it RENDERS like this, no matter which theme I am using:   
+</p>
+<img src="/wp-content/uploads/images/nobueno.jpg">
+
+GAH! That&#8217;s not what I thought I was getting! No friggin bueno!   So I decided to try a third party code highlighter. 
+
+I really liked the <a href="http://www.unboundimagination.com/Rails-Plugin:-TextMate-Syntax-Highlighting">TextMate Syntax Highlighter</a>, but: it didn&#8217;t work either.  
+
+My friend and former colleague <a href="http://www.brendanlim.com">Brendan</a> pointed me to <a href="http://code.google.com/p/syntaxhighlighter/">a javascript-based code highlighter</a> that does the formatting on the browser. That makes good sense to me. I like it. But it didn&#8217;t work either.   
+
+So, I&#8217;ve decided to roll up my sleeves and figure out why none of the included themes in Typo will render the code blocks the way I want. 2 hours later, I hate the CSS mess, so I&#8217;m spending my evening ripping the whole set of stylesheets apart to make them work right.   
+
+Stay tuned.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/05/02/a-little-plug-for-railsplayground/">A Little Plug for RailsPlayground</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-05-02T00:00:00-04:00" pubdate data-updated="true">May 2<span>nd</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+I host this blog with <a href="http://www.railsplayground.com">RailsPlayground</a>. Mostly, I never have to edit files on my hosted accounts, because I use robust deployment tools. However, today I had to tweak my .htaccess file and found that my shared host didn&#8217;t have &#8220;emacs&#8221;. 
+</p>
+<p>
+Alright. Are you kidding me? No emacs? I know that most of the younguns these days use &#8220;vi&#8221; or something else to edit on UNIX. And that&#8217;s FINE. &#8220;vi&#8221; is small (it fits on a floppy!) powerful, and a generally great editor. 
+</p>
+<p>
+I simply come from the old school. When I was in college, someone asked my CS101 professor: &#8220;Mr. Anastasio, is there another UNIX editor I could use for my homework other than emacs?&#8221; 
+</p>
+<p> 
+His reply: &#8220;No. If you are going to work in software, emacs is THE editor.&#8221;
+</p>
+So I fired off this message to tech support: 
+<typo:code>
+I am loving the service so far. Very easy to set up and use. 
+
+HOWEVER! I was surprised to see that you don&#8217;t have emacs installed on your developer accounts. 
+
+Any chance of getting it installed? 
+I can use vi and other editors, but I&#8217;m a developer who comes from the &#8220;emacs is the only way&#8221; camp. :) 
+
+Thanks!
+</typo:code>
+I kid you not. TEN minutes later, I got this reply: 
+<typo:code>
+Hello Peter,
+
+This is now installed on your server. 
+
+Note that your account is on a shared server, so if you try to copy very large 
+files it can use a lot of swap and memory space on the server. So if there are 
+any issues, we will be forced to disable it. 
+</typo:code>
+<p>
+Aside from not understanding how I might copy large files with emacs and run the server out of RAM, I think this is a GREAT answer. 
+</p>
+<p>
+Thanks RailsPlayground!
+</p>
+If you are looking for a good Rails host, I suggest you read <a href="http://www.railshosting.org/#10_things_to_look_for">this article</a>.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/04/30/startup-lessons/">Startup Lessons</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-30T00:00:00-04:00" pubdate data-updated="true">Apr 30<span>th</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is an extension of an article I wrote on my <a href="http://peterjacksonmd.livejournal.com/3032.html#cutid1">Livejournal</a> a couple years ago. Since many Rails developers work for small startups or are themselves starting up a business, I thought I&#8217;d update it with some reflections from the past couple years I&#8217;ve spent working in a scrappy startup.</p>
+<p><font size="+1" face="Arial,Helvetica"><i><b>Top 10 Startup Lessons</b></i></font></p>
+<p><strong>1. There is no better way to ensure attendance at a 7:00 AM conference call</strong> than to schedule it yourself, invite your employees, and discuss something important. At my startups, we held a daily briefing. It lasted 15 minutes. We got a lot done in 15 minutes.</p>
+<p><strong>2. Skype, GotoMeeting, Vonage, VirtualPBX, </strong>and other services are incredibly cheap ways to get big company communications services quickly. And they tend to just &quot;work.&quot;</p>
+<p><strong>3. Accountants, Lawyers, and Benefits Administrators </strong> cost so much because they are worth it. Outsource everything that is not related to growing your business. Corollary: In the startup days, don&#8217;t buy anything you don&#8217;t absolutely need unless it makes strategic sense to do so. You generally don&#8217;t need recruiters, expensive server software, top of the line new machines, or a country club membership to woo clients. You do, however, need the best people you can get, tooling, basic processes, and the facility to encourage innovation.</p>
+<p><strong>4. Hire slowly</strong>, but fire quickly.</p>
+<p><strong>5. Get an Advisory Board</strong> Get one. Make sure they are successful people you can trust. You don&#8217;t have to know them terribly closely. FOAF is adequate.</p>
+<p><strong>6. You can start a business working half days.</strong> Whichever 12 hours you want.</p>
+<p><strong>7. Small business professional services is about babysitting. </strong> Employees, clients, partners, vendors, etc. They all need babysitting from time to time.</p>
+<p><strong>8. Everything you learned in B school was wrong, and it was also right. </strong> Because you see, it depends. I often found myself asked by my partners for the magic bullet they taught us in B school that would solve problem X. The magic bullet is a myth. They simply made sure we know how to think in B school. Or, at least, I think that was the point.</p>
+<p><strong>9. Don&#8217;t underestimate the power of your network. But don&#8217;t overestimate it either. </strong> Or, put another way, start a business, and you will quickly find out who you can count on. Don&#8217;t hold it against your friends if they can&#8217;t help you. After all, business is business. Friendship ought not be business (even though a version of it is the oldest business model around). And, don&#8217;t be suprised if you get a 6-figure contract from someone you had on your 5-th round call list. If that does happen, move that person up in your CRM system. Oh, and use a CRM system. Preferably a free one.</p>
+<p><strong>10. There is no reason to shower and change out of your pajamas for a 7AM conference call. </strong> Unless it&#8217;s a video iChat and you forgot.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/7/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/5/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2011/08/02/my-review-of-metolius-porta-cord-rope-bag/">My Review of Metolius Porta-Cord Rope Bag</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/07/09/intro-to-spatial-programming/">Intro to Spatial Programming</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/05/25/the-revenge-of-inigo-montoya/">The Revenge of Inigo Montoya</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/04/14/oracle-spatial-support-in-spatial_adapter-for-activerecord/">Oracle Spatial support in spatial_adapter for ActiveRecord</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2010/03/26/goodbye-textmate/">Goodbye TextMate</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
