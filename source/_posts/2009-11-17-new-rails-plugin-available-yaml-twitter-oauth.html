@@ -1,0 +1,47 @@
+---
+layout: post
+title: ! 'New Rails Plugin Available: YAML Twitter OAuth'
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  aktt_notify_twitter: 'no'
+  _edit_last: '2'
+  image: ''
+---
+When I build Twitter OAuth apps, I usually register three apps. One for development purposes, one for staging and user-acceptance testing, and the production application. Each of these registered apps will have a different Twitter OAuth Consumer Token and Secret. Instead of writing procedural code to set the right tokens up for each environment, or setting them in the various environment/*.rb files, I prefer to set them up declaratively like you do in database.yml.
+
+I've extracted the basic code i use to do this and published it as a simple plugin called <a title="yaml_twitter_oauth" href="http://github.com/peteonrails/yaml_twitter_oauth">yaml_twitter_oauth</a>.
+
+It allows you to set up your consumer tokens like this:
+<pre lang="yaml">defaults: &defaults
+  request_token_url: http://twitter.com/oauth/request_token
+  access_token_url: http://twitter.com/oauth/access_token
+  authorize_url: http://twitter.com/oauth/authorize
+
+development:
+  <<: *defaults
+  consumer_key: 12345678
+  consumer_secret: this-is-your-application-secret
+
+staging:
+  <<: *defaults
+  consumer_key: 12345678
+  consumer_secret: this-is-your-application-secret
+
+production:
+  <<: *defaults
+  consumer_key: 12345678
+  consumer_secret: this-is-your-application-secret
+</pre>
+
+It's also useful if you want to regenerate your secret key and need a simple declarative way to update it. 
+
+To install the plugin: 
+
+<pre lang="bash">
+ script/plugin install git://github.com/peteonrails/yaml_twitter_oauth.git
+</pre> 
+
+Enjoy! 

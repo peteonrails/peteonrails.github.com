@@ -1,0 +1,70 @@
+---
+layout: post
+title: The Revenge of Inigo Montoya
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  aktt_notify_twitter: 'no'
+  _edit_last: '2'
+  image: ''
+---
+<pre lang='ruby'>
+:false
+</pre>
+
+You keep using that symbol. I do not think it means what you think it means. 
+
+Today, I'd like to describe something I like to call: <strong>The Inigo Montoya Attack</strong>. It is the implementation in code -- often with good intentions, but sometimes simply because of ignorance -- of an algorithm which masks one clear, well-known paradigm inside of another that completely obfuscates your actual intent.  Unless you have six-fingers on your right hand (I'm talking to YOU, <a href="http://en.wikipedia.org/wiki/Count_Rugen">Count Rugen</a>) you are forbidden from this practice. 
+
+Here's some code I came across in a codebase I was maintaining. 
+
+<pre lang='ruby'>
+ def logged_in_from_token?
+    current_user = token_exists? ? log_in_from_token : :false
+ end
+</pre>
+
+It looks strange. It OUGHT to look strange. What is that :false symbol all about? 
+
+I'll tell you what it is. It's a very misleading piece of code. Because when you do not log the user in from a token, current_user is NOT set to false, in the boolean sense. It is, in fact, a boolean "true" value in Ruby. 
+
+Try this in IRB: 
+
+<pre lang='ruby'>
+ if :false  
+   puts "You keep using that word. I do not think it means what you think it means." 
+else 
+  puts "Have fun storming the castle!"
+end
+</pre>
+
+If <em><strong>:false</strong></em> evaluated to a <em>boolean false</em> value, then you'd see "Have fun storming the castle!". But instead, you get "You keep using that word. I do not think it means what you think it means." If you're trying to make readable code, using the symbol <em><strong>:false</strong></em> is dangerous and misleading. 
+
+To make matters worse, this code assigns <em><strong>:false</strong></em> to the value <strong>current_user</strong>, which is a well-known and established name used in a number of Rails patterns. RESTFul Authentication and Authlogic BOTH support the notion of <strong>current_user</strong>, and when nobody is logged in, THAT METHOD RETURNS FALSE. Not the doppleganger wannabe <em><strong>:false</strong></em>, but a real, honest to goodness, <em>boolean false</em>. (OK: it's actually returning nil, but nil is false). 
+
+So imagine my bewilderment when this basic test no longer worked: 
+
+<pre lang='ruby'>
+  <%- if current_user %>
+    <%= display_logged_in_stuff()  %>
+  <% else %>
+      You are not logged in
+   <% end %>
+</pre>
+
+So a couple hours of debugging later, I found myself using 'ack in project' to remove all references to the silly symbol <em><strong>:false</strong></em>. 
+
+Lessons for Rubyists: 
+<ol>
+	<li>Be clear. :false is never actually false. Don't use it. </li>
+	<li>Follow established conventions. The method <strong>some_test?</strong> should always return a boolean value. If it doesn't, leave off the question mark!</li>
+ 	<li>Don't reinvent the wheel! The implementor of the code above could have simply used RESTful Authentication or Authlogic and have avoided the whole mess. </li>
+	<li>Unit tests are still important! Remember that someone has to maintain your stuff someday. A simple unit test would have caught the bug introduced by using the symbol <strong>:false</strong> in place of a <em><strong>boolean false</strong></em>.</li>
+</ol>
+
+Have fun storming the castle!
+
+
+

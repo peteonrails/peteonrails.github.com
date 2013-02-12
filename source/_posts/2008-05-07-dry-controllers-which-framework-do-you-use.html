@@ -1,0 +1,29 @@
+---
+layout: post
+title: ! 'DRY controllers: Which Framework do you use?'
+tags:
+- Code
+- Rails
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+RESTful applications built with script/generate have a lot of repetitive code. Each generated controller will define default "index" "create" "new" "update" and "destroy" methods that looks similar from controller to controller. 
+
+There are at least FOUR plugins that aim to DRY up RESTful controllers each with their own benefits and weaknesses: 
+
+<ol>
+ <li><a href="http://nex-3.com/posts/54-make_resourceful-0-2-0">make_resourceful</a> - There's a great <a href="http://railscasts.com/episodes/92">Railscast on make_resourceful.</a></li>
+ <li><a href="http://jamesgolick.com/2007/10/19/introducing-resource_controller-focus-on-what-makes-your-controller-special">resource_controller</a> Provides a super-class controller that you inherit from. Pretty sweet at handling nested resources.....but don't confuse it with... </li>
+ <li><a href="http://agilewebdevelopment.com/plugins/resources_controller">resources_controller</a> -- which uses a declarative syntax instead of a superclass. I like seeing "resources_controller_for :foos" in my code. </li>
+ <li><a href="http://soylentfoo.jnewland.com/articles/2007/09/17/resource_this-dry-rails-resource-controllers">resource_this</a> -- Heavily uses before_filters, if you'd prefer to see things that way.</li>
+</ol>
+
+I am working on a longer, more in-depth comparison of the available frameworks. but I've gotta tell you, a "winner" needs to shake out of this list. Having four very strong and useful, but VERY DIFFERENT, ways to DRY up controllers is not beneficial. 
+
+Do you remember when there were six ways to Paginate records in a Rails app? Now we use "will\_paginate", and that's how it's done. Everyone knows how to use will_paginate, and it's terse, well tested, and well supported. 
+
+So, which framework do you use? Let me know. I'm interested. 
+

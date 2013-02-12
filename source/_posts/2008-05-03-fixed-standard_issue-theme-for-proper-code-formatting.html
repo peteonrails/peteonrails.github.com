@@ -1,0 +1,25 @@
+---
+layout: post
+title: Fixed standard_issue Theme for proper code formatting
+tags:
+- Blogging
+- Code
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+Alright. The Typo 5.x Standard Issue theme (which I really like, so much that I switched from Scribbish) does not account for the styles used by typo:code macros. 
+
+After much headache trying to get Typo to include the typocode themes in minimal.css while rendering themes (so that code would render nicely in any theme that I choose to use), I gave up. Really, I'm not sure I want to override typocode styles in every theme anyway, because someone might come up with an even better set of styles. 
+
+So instead, I've patched themes/standard_issue/stylesheets/application.css to include the typocode styles. As you can see, code is rendering much more bueno now. 
+
+Thanks <a href="http://www.acts-as-blogr.com">Brent</a>, for beating me up enough to invetigate a better theme. 
+
+If you use Standard Issue and want the updated stylesheet, grab it from <a href="/stylesheets/theme/application.css">my site.</a> 
+
+Now, I am working on a bug in the ruby formatting that displays line numbers incorrectly, like this: 
+
+<img src="/wp-content/uploads/images/linenumber.jpg"/>

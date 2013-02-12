@@ -1,0 +1,51 @@
+---
+layout: post
+title: Rails 2.1 nested routes and complex nestings
+tags:
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+The new Rails routing has nice support for nested reources. And, I think it handles just enough nesting. Any more support, and it's possible to go overboard and write ugly code. 
+
+For example, here is what Rails now supports for nested routing syntax: 
+
+<pre lang="ruby" line="1">
+  # Simple parent child association
+  map.resources :user, :has_many => :posts
+
+  # A parent with many types of children
+  map.resources :posts, :has_many => [:comments, :trackbacks, :pingbacks ]
+</pre>
+Nice. That is prefectly terse and descriptive, without being too clever. 
+
+There has been some debate and consternation over why a complicated multi-nested resource can't be set up this way. For example, if I am building a project management tool, why can't I do this?
+
+<pre lang="ruby" line="1">
+map.resources :projects, 
+  :has_many => [ :releases,  :milestones => [:tasks, {:features => :tasks}] } ]
+</pre>
+That is, a project has many releases AND milestones, and in turn milestones have many tasks and features. And, features can also have tasks. 
+
+That's complicated, and too much cleveness to jam into one statement. I think Rails 2.0.2 / 2.1 has it right in making you write that routing rule like this: 
+
+<pre lang="ruby" line="1">
+  map.resources :projects do |project|
+    project.resources :releases
+    project.resources :milestones do |milestone| 
+      milestone.resources :tasks
+      milestone.resources :features do |feature|
+        feature.resources :tasks
+      end
+    end
+  end
+</pre>
+I hear a crowd of people clamoring for the uber-terse syntax outlined in the second listing. I think that's a <strong>bad idea</strong>. It encourages hard-to-follow, obfuscated code. 
+
+When you have to do something complicated, it's worth taking a few extra lines to make it clear to the next programmer. 
+
+

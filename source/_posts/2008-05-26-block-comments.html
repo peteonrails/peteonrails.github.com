@@ -1,0 +1,47 @@
+---
+layout: post
+title: Block Comments
+tags:
+- Code
+- Software Development
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+Since I seem to be on a "Comment" and "Terseness" rant, I'd like to point out that I dislike block comments for everything but RDoc. 
+
+<pre lang="ruby" line="1">
+x ||= ["0"]
+=begin
+  this is a block comment
+  It's good for auto-generated documentation
+  , I suppose. 
+ 
+  x.push("1")
+
+  But that line of code above might be mistaken 
+  for something that executes, if you're not using
+  a good IDE with colorization. 
+ 
+=end
+puts x.inspect          # ["0"].... NOT ["0","1"]
+</pre>
+
+It's harder to make that mistake when the code looks like this: 
+<pre lang="ruby" line="1">
+x ||= ["0"]
+#  this is not a block comment
+#
+#  x.push("1")
+#
+#  Now that line of code above shouldn't be mistaken 
+#  for something that executes, even if you're not using
+#  a good IDE with colorization. 
+
+puts x.inspect          # ["0"], just like you'd expect
+</pre>
+Given that just about every IDE out there allows you to select a bunch of text and comment it out en-masse, I think the second method works better. 
+
+Hopefully, <a href="http://www.rubyinside.com/21-ruby-tricks-902.html">Peter Cooper</a> will forgive me for taking issue with so many of his Ruby Tricks. Most of them are REALLY REALLY GOOD. 

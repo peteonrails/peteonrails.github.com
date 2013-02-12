@@ -1,0 +1,37 @@
+---
+layout: post
+title: VoteFu 0.0.7
+tags:
+- Code
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+  aktt_tweeted: '1'
+---
+A couple of contributors forked VoteFu and submitted some patches. I've updated the master branch to integrate the changes. Notably:
+<ul>
+	<li>VoteFu now works as a standard gem in a Ruby application. (i.e. not as a Rails plugin)</li>
+	<li>VoteFu now works as a Rails Gem Plugin.</li>
+	<li>VoteFu now works with Rails 2.2.2.</li>
+	<li>Other assorted small bugfixes.</li>
+</ul>
+To install VoteFu as a Gem Plugin:
+<pre lang="bash">
+sudo gem install peteonrails-vote_fu
+</pre>
+Then in config/environment.rb: 
+<pre lang="ruby">
+  config.gem "peteonrails-vote_fu", 
+     :source => "http://gems.github.com", 
+     :lib => "vote_fu"
+</pre>
+And then, optionally: 
+<pre lang="bash">
+rake gems:unpack
+</pre>
+
+Special thanks to Jon Maddox and Bence Nagy for the updated code. <a href="http://github.com/peteonrails/vote_fu/tree/master">Check it out yourself!</a>

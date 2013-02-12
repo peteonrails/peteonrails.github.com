@@ -1,0 +1,63 @@
+---
+layout: post
+title: Goodbye TextMate
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  image: ''
+  _edit_last: '2'
+  aktt_notify_twitter: 'yes'
+  enclosure: ! "http://blog.peteonrails.com/wp-content/uploads/2010/03/iShowU-Capture2.mov\r\n1377823\r\nvideo/quicktime\r\n"
+  aktt_tweeted: '1'
+---
+I've been using TextMate to develop Ruby on Rails applications for a very long time. But as of today, I'm abandoning TextMate. And <a href="http://pivotallabs.com/users/alex/blog/articles/1201-textmate-the-last-straw">I'm not the only one.</a>
+
+For me, the last straw with TextMate was the issue illustrated<a href="http://blog.peteonrails.com/wp-content/uploads/2010/03/iShowU-Capture2.mov"> in this video</a>. When you have all of your methods folded up, and you delete a line of whitespace that follows a folded up block of code, the editor will in fact delete the entire folded up code block. This might be working as expected, but I expect better.
+
+Some other annoyances I've had with TextMate include:
+<ul>
+	<li>Random Pinwheeling (lockups that take unspecified amounts of time to clear)</li>
+	<li>Sluggish performance</li>
+	<li>Drawer behavior: When I want it on the left, I want it on the left. Even if my window is too close to the left side of my monitor. STOP OPENING ON THE RIGHT! DO YOU HEAR ME! (excerpt from an actual conversation with TextMate).</li>
+	<li>No significant updates in over two years. Not even the kind you pay for.  I guess the upside of this is that any Bundles you find are pretty well guaranteed to work with your version of TextMate, because there's really only one version.</li>
+</ul>
+After making the decision that I couldn't continue to work in a professional setting with an editor that contains so many productivity-sapping limitations for me, I decided to switch.
+
+I found that in making my list of requirements for a replacement editor, the beginning of it was an enumeration of what sucks about TextMate. I needed:
+<ol>
+	<li> Fast Search in Project</li>
+	<li> Fast "Find Usages"</li>
+	<li> A lack of code-munching bugs.</li>
+</ol>
+But  there are a lot of things that I like about TextMate. I wanted to keep those features too:
+<ol>
+	<li>Autosave</li>
+	<li>Fuzzy Match</li>
+	<li>Strong Ruby Language Support</li>
+	<li>HAML and SASS support</li>
+	<li>Modules / Plugins / Bundles</li>
+	<li>No Crashing</li>
+	<li>Themes and control over colorization</li>
+</ol>
+First, I checked out <a href="http://www.jetbrains.com/ruby/index.html">RubyMine</a>, but found that it crashed and froze on me a lot. I can't have a code editor that crashes or freezes a lot. Alex Chaffee of Pivotal Labs likes RubyMate, however, so your mileage may vary. It's worth checking out. <a href="http://www.jetbrains.com/ruby/download/index.html">And you can check it out for free</a>.
+
+Next I investigated <a href="http://www.panic.com/coda/">Coda</a>: it's pretty, but doesn't have a made-for-ruby feel to it. It's got a very extensible plugin framework, and a lot of plugins made for it, but a couple of key plugins were missing, and I can't afford to take the time to write the plugins right now.
+
+Then I tried BBEdit: nice, but again: not enough support through plugins for the kinds of ruby development I do.
+
+Then MacVim: which is awesome but I HATE 'vi' (if I'm going to use a UNIX editor for programming, it's going to be emacs).
+
+Finally, I decided to try <a href="http://netbeans.org/">NetBeans</a>, and found everything I needed, and some stuff I didn't even KNOW I needed. I was genuinely surprised that I liked NetBeans, given its background as a Java IDE. But the Ruby modules for Netbeans are very nice. Here's what I liked the most, in no particular order:
+<ul>
+	<li>Autotest, running right in the IDE: I don't have to remember to start it in a terminal. It just runs in my IDE.</li>
+	<li>Search. It's Fast. And I didn't have to install Ack In Project to make it so.</li>
+	<li>When my continuous integration build fails, my IDE is notified, and it tells me so.</li>
+	<li>It integrates with bug trackers.</li>
+</ul>
+Aside from the "search" item, I didn't even know I needed half of that stuff. But now that I have it, I can't go back.
+
+I still use TextMate for a basic editor, and still love the column-wise cut-and-paste feature. But I won't use it for development anymore.
+
+So long, TextMate. It's been a ride.

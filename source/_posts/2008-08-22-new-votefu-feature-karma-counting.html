@@ -1,0 +1,25 @@
+---
+layout: post
+title: ! 'New VoteFu Feature: karma counting'
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+  aktt_tweeted: '1'
+---
+I have just introduced the "has_karma" mixin to VoteFu. It aims to assign a karma score to the owners of voteable objects. This is designed to allow you to see which users are submitting the most highly voted content. Currently, karma is only "positive". That is, +1 votes add to karma, but -1 votes do not detract from it.
+<pre lang="ruby" line="1">class User 
+  has_many :posts
+  has_karma :posts
+end
+
+class Post
+  acts_as_voteable
+end
+
+# in your view, you can then do this: 
+Karma: <%= @user.karma %>
+</pre>
+This feature is new and probably going to be enhanced significantly, but useful enough that I'm releasing it now.

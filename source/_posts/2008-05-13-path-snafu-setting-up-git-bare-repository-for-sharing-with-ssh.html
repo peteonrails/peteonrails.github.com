@@ -1,0 +1,57 @@
+---
+layout: post
+title: PATH Snafu setting up "git --bare" repository for sharing with ssh
+tags:
+- Software Development
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+I use Mac OS X 10.5.2.
+
+I was in the process of setting up a master repository for the source code to a couple of projects I am working on that I am not hosting on github. Since I work on them from a couple locations, I figured I'd set up my workstation at home as a git "server" (to use the SVN terminology) and then use "git pull" on both that workstation and on my laptop to grab working copies, and keep them in sync. 
+
+Hey, git's made for distributed development. Who says I can't pretend to be two remote developers? 
+
+I set up my "origin" repository like this. All went well until I tried to push my master branch to it. 
+
+<pre lang="bash" line="1">
+myhost: Pete$ mkdir -p /var/git/pete_on_rails.git
+myhost: Pete$ cd /var/git/pete_on_rails.git/
+myhost: Pete$ git --bare init
+Initialized empty Git repository in /private/var/git/pete_on_rails.git/
+
+myhost: Pete$ cd ~/workspace/pete_on_rails/
+myhost: Pete$git remote add origin ssh://myhost.local/var/git/pete_on_rails.git
+myhost: Pete$  git push origin master
+Password:
+bash: git-receive-pack: command not found
+fatal: The remote end hung up unexpectedly
+</pre>
+ 
+Boom. 
+
+Unfortunately, "SSH" isn't so smart about paths on OSX. It doesn't read ~/.bash_profile or /etc/bashrc or /etc/profile or /etc/login or ~/.login. 
+
+It usually DOES, however, read <strong>~/.bashrc</strong>. That's not where I like to set up my pathing, but adding this to the file fixed the issue: 
+
+<pre lang="bash" line="1">
+# in ~/.bashrc
+export PATH=/usr/local/git/bin:$PATH
+</pre>
+
+Here's what happened after I ran the command: 
+<pre lang="bash" line="1">
+myhost: Pete$ git push origin master
+Password:
+Counting objects: 2663, done.
+Compressing objects: 100% (2460/2460), done.
+Writing objects: 100% (2663/2663), 5.13 MiB | 2271 KiB/s, done.
+Total 2663 (delta 292), reused 0 (delta 0)
+To ssh://myhost.local/var/git/pete_on_rails.git
+ * [new branch]      master -> master
+</pre>
+If you need a hint as to what SSH thinks the path is, take a peek in <strong>/etc/ssh/sshd_config</strong>. 
+

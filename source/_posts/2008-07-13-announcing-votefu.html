@@ -1,0 +1,42 @@
+---
+layout: post
+title: Announcing VoteFu
+tags:
+- Code
+- plugins github vote_fu
+- Rails
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+  title: Announcing VoteFu
+  description: Post describing the release of a new Rails plugin, vote_fu, that enables
+    a voting mixin for rails models.
+  keywords: acts_as_voteable vote_fu rails plugin
+---
+<a href="http://blog.peteonrails.com/vote-fu/">VoteFu</a> is a voting mixin that allows you to extend your models to vote on one another. Largely based on <a href="http://www.juixe.com/techknow/index.php/2006/06/24/acts-as-voteable-rails-plugin">Cosmin Radoi's acts_as_voteable plugin</a>, VoteFu adds named_scope support, a set of generators to make using the plugin easier,  a :polymorphic association to the voting class (so you can have more than one model type perform votes), and some enhancements for Rails 2.1. 
+
+I have simplified the code it requires to cast a vote down from three to one. After setting up your models with the proper mixin functionality, you can cast votes like this: 
+<pre lang="ruby" line="1">
+   voter.vote_for(voteable)
+   # OR
+   voter.vote_against(voteable)
+  # OR
+   voter.vote(voteable, [true | false] )
+</pre>
+
+You can also use the old acts_as_voteable sytnax (which will continue to be supported):
+
+<pre lang="ruby" line="1">
+  vote = Vote.new(:vote => true)
+  m    = Model.find(params[:id])
+  m.votes    << vote
+  user.votes << vote
+</pre>
+
+I hope you find the plugin useful. Comments and feedback welcome. If there is enough demand, I'll open up a lighthouse project to track issues. 
+
+<strong><a href="http://github.com/peteonrails/vote_fu/tree/master">Grab the code from GitHub</a> or visit the <a href="/vote-fu/">VoteFu Page</a>.
+
+

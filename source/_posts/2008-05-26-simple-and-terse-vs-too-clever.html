@@ -1,0 +1,59 @@
+---
+layout: post
+title: Simple and Terse Vs. Too Clever
+tags:
+- Code
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+In <a href="http://www.rubyinside.com/21-ruby-tricks-902.html">21 Ruby Tricks You Should Be Using In Your Own Code</a>, Peter Cooper outlines some really useful best practices that programmers could benefit from. However, I think that there's a tendency to over-obfuscate code from time to time in the Ruby world. 
+
+I like terse code. I like beautiful code. But I dislike tricky code. For example, let's look at two tricks Peter Cooper outlines in his post: 
+
+Trick #7: Cut down on local variable definitions.
+<pre lang="ruby" line="1">
+
+# Cooper says do this: 
+(z ||= []) << 'test'
+
+# Instead of this: 
+z ||= []
+z << "test"
+</pre>
+Counting whitespace characters, Cooper's version of the code is 20 characters long. The second version of the code is 20 characters long. Personally I find the second version easier to read. 
+
+Trick #9: 9 - Use 'and' and 'or' to group operations for single liners.
+<pre lang="ruby" line="1">
+# Cooper likes this:
+queue = []
+%w{hello x world}.each do |word|
+  queue << word and puts "Added to queue" unless word.length <  2
+end
+puts queue.inspect
+
+# Output:
+#   Added to queue
+#   Added to queue
+#   [â€helloâ€, â€œworldâ€]
+</pre>
+Hm. While I think this does terse up the code by grouping statements that do a single logical operation onto one line, I think it's still easier to read this way: 
+<pre lang="ruby" line="1">
+# I like this:
+queue = []
+%w{hello x world}.each do |word|
+  unless word.length < 2 do
+    queue << word
+    puts "Added to queue" 
+  end
+end
+puts queue.inspect
+</pre>
+I think this method makes it easier to modify the discrete elements of the queue operations. For example, I may want to comment out that call to "puts" someday, which would be tougher if I'd used the "and" operator to string it all together on one line. I might also want to add a debug log statement. Again, it gets tough when you're trying to fit it all onto one line. 
+
+My opinion is that finding tricks in the language that allow you to string a bunch of steps onto one line aren't always the best way to make good code. Sometimes, finding a way to make a set of statements look like a logical unit is a better choice. 
+

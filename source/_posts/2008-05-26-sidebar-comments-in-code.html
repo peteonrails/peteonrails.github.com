@@ -1,0 +1,42 @@
+---
+layout: post
+title: Sidebar comments in code
+tags:
+- Code
+- Ruby
+- Software Development
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+In my post about <a href="http://blog.peteonrails.com/articles/2008/05/28/simple-and-terse-vs-too-clever">clever code vs. terse code</a>, I showed some distaste for code that attempts to put a bunch of logical statements on one line. I have a particular coding prejudice that lines of code should be short from left-to-right, if at all possible.
+
+The reason? <strong>I like sidebar comments.</strong>
+
+Maybe this is my showing my age. Back in the day, we didn't have widescreen MacBook Pro laptops that could display 600 characters across the screen. (And we liked it! While walking uphill both ways in the snow to school...) Between 17" CRT monitors and the IDE, I was lucky to get 100 characters across.
+
+So instead of writing long lines of code, I prefer to use a couple extra lines and simplify each discrete statement. Then I will sometimes put comments (aligned with each other) out in the right margin that map to my pseudo-code (which is usually just in my head....I don't actually write much pseudo-code in Ruby).
+
+For example:
+<pre lang="ruby" line="1">
+# Spawn a set of threads to process the queue
+1.upto(threadcount) do |thread_id|
+  threads << Thread.new(thread_id) do |i| # Each thread
+    until @queue.empty?() do                    # grabs an item from the queue
+      yield(thread_id, @queue.deq())            # and yields it to the block
+    end
+  end
+end
+</pre>
+Some people call this "code smell." The meaning, I guess, is that if I have to write comments that outline what the code does, the code must be too complicated.
+
+<strong>I beg to differ.</strong>
+
+Imagine for a moment that you are a fresh-out-of-college programmer, and you open up my codebase to maintain it. You find this:
+<pre lang="ruby" line="1">
+# Spawn a set of threads and process the queue all on one line
+1.upto(threadcount) { |thread_id| threads << Thread.new(thread_id) { |i| yield(thread_id, @queue.deq()) until @queue.empty?  } }
+</pre>
+You might run away screaming after a few dozen lines like that. I sure would. Smaller lines with comments make it easier to follow. And I think sticking them out on the right margin where they don't interrupt the flow of code makes it easier to ignore them if you're an experienced programmer who doesn't need them.

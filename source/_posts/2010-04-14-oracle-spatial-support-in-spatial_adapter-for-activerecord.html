@@ -1,0 +1,39 @@
+---
+layout: post
+title: Oracle Spatial support in spatial_adapter for ActiveRecord
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  aktt_notify_twitter: 'yes'
+  _edit_last: '2'
+  image: ''
+  aktt_tweeted: '1'
+---
+I've recently made public the first cut of functionality for Oracle Spatial support in Fragility's <a href="http://github.com/peteonrails/spatial_adapter" target="_blank">Spatial Adapter for ActiveRecord</a>. It's not ready for prime time, but it's useful enough to open up to collaboration. As soon as I finish up complete spec tests and a couple of refactorings, I plan to issue a pull request and get the functionality included in the main fork of spatial_adapter on Github.
+
+I won't go too far into how to use the adapter until it's ready for prime time. This message is intended to encourage collaboration among anyone else who is in the unfortunate boat of having to use Oracle Spatial and Rails without built in driver support (which is not fun).
+
+To use the functionality, <a href="http://blog.rayapps.com/2009/09/14/how-to-install-oracle-database-10g-on-mac-os-x-snow-leopard/">install Oracle</a>, <a href="http://rubyforge.org/projects/georuby/">Install GeoRuby </a>, then install <a href="http://github.com/peteonrails/spatial_adapter">my fork of the spatial_adapter</a>.
+
+Then you can do this:
+
+<pre lang="ruby">
+   create_table :points_of_interest do |t|
+      t.geometry :location
+      t.string :venue_name 
+      t.timestamps
+   end
+ 
+   add_index :points_of_interest, [:location], :spatial => true
+
+</pre>
+
+Then all of the relevant rows will be set up for you in SDO_GEOM_METADATA, SDO_INDEX_METADATA, and SDO_INDEX_METADATA_TABLE. 
+
+Currently, there is only support for geometry types. Explicit point, polygon, line, and multipolygon types will come later. 
+
+Feedback is encouraged.
+
+<em>P.S. To everyone wondering what happened to the VoteFu major upgrade, it's imminent. Thanks to everyone who has submitted patches in the past few months. It'll be released *real soon now*</em>

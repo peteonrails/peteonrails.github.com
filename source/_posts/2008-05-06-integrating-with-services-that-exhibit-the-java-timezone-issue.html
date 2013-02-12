@@ -1,0 +1,38 @@
+---
+layout: post
+title: Integrating with Services that exhibit the Java Timezone Issue
+tags:
+- Code
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+<a href="http://blog.peteonrails.com/2008/05/06/converting-to-and-from-unix-java-time-epoch">In my last post</a>, I described an XML over HTTP service written in Java that I have to integrate with. I expressed a minor and general annoyance at the fact that the developers of this service specify that a "DateTime" parameter be specified in "milliseconds since the epoch". 
+
+There is another typical problem with Java services that isn't always as evident. 
+
+When Congress decides to change the Daylight Savings Time switch dates, the JVM typically needs to be patched separately from the OS it is running on. And this <strong>never happens</strong>. 
+
+So, if you are passing a message to a Java service gateway with a parameter like "delivery time" specified in "milliseconds since epoch", and you think it's Daylight Savings Time, but the Java service thinks it's "Standard Time", then your message will be delivered an hour late. 
+
+I usually deal with that case ad-hoc by specifying a variable in a YAML file, like this:
+
+<pre lang="ruby" line="1">
+tz-fix: true
+</pre>
+
+And then in my code like this: 
+<pre lang="ruby" line="1">
+  # Read in my config
+  @@c = YAML.load_file(File.join(File.dirname(__FILE__), "myapp.yml"))   
+# ...
+  millis = millis - (60*60*1000) if @@c["tz-fix"]
+</pre>
+
+If the remote service talks in "seconds since epoch", I drop the "* 1000". 
+
+Good luck. 

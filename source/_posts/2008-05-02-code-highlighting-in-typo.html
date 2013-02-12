@@ -1,0 +1,31 @@
+---
+layout: post
+title: Code Highlighting in Typo
+tags:
+- Blogging
+- Code
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+<p>Code Highlighting in Typo is awful, cumbersome, and a pain. I am currently running this blog on Typo 5.0.3, and when I write an article using typo:code snippets using LivePreview, here is what I see:   </p>
+<p>
+<img src="/wp-content/uploads/images/typoexample.jpg">
+</p>
+
+<p>
+But then it RENDERS like this, no matter which theme I am using:   
+</p>
+<img src="/wp-content/uploads/images/nobueno.jpg">
+
+GAH! That's not what I thought I was getting! No friggin bueno!   So I decided to try a third party code highlighter. 
+
+I really liked the <a href="http://www.unboundimagination.com/Rails-Plugin:-TextMate-Syntax-Highlighting">TextMate Syntax Highlighter</a>, but: it didn't work either.  
+
+My friend and former colleague <a href="http://www.brendanlim.com">Brendan</a> pointed me to <a href="http://code.google.com/p/syntaxhighlighter/">a javascript-based code highlighter</a> that does the formatting on the browser. That makes good sense to me. I like it. But it didn't work either.   
+
+So, I've decided to roll up my sleeves and figure out why none of the included themes in Typo will render the code blocks the way I want. 2 hours later, I hate the CSS mess, so I'm spending my evening ripping the whole set of stylesheets apart to make them work right.   
+
+Stay tuned.

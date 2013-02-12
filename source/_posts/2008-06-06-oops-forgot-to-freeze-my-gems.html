@@ -1,0 +1,40 @@
+---
+layout: post
+title: Oops. Forgot to Freeze my Gems.
+tags:
+- Rails
+- Ruby
+- Software Development
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+Sorry for the outage on this blog yesterday. My hosting provider upgraded to Rails 2.1, and I had cleverly forgotten to:
+
+<pre lang="bash">
+bash# rake freeze:rails:gems
+</pre>
+
+If this happens to you, and you make the unfortunate mistake of trying to instead update Typo to Rails 2.1 using: 
+<pre lang="bash">
+bash# rake rails:update
+</pre>
+
+You'll be in even worse trouble, unless you're prepared to do a lot of fixing: 
+<pre lang="bash">
+bash# Pete$ script/server
+./script/../config/boot.rb:45:in `require': no such file to load -- ./script/../config/../vendor/rails/railties/lib/initializer (LoadError)
+	from ./script/../config/boot.rb:45:in `load_initializer'
+	from ./script/../config/boot.rb:38:in `run'
+	from ./script/../config/boot.rb:11:in `boot!'
+	from ./script/../config/boot.rb:109
+	from script/server:2:in `require'
+	from script/server:2
+</pre>
+
+Your best bet? Revert from source control and freeze Typo in your dev environment. If you're stuck without source control or a dev environment, let me know and I'll talk walk you through the alternate fix. 
+
+
+

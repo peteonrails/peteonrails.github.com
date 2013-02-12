@@ -1,0 +1,107 @@
+---
+layout: page
+title: Vote Fu
+tags: []
+status: publish
+type: page
+published: true
+meta:
+  _wp_page_template: default
+  _edit_last: '2'
+  keywords: ruby rails plugin vote votefu vote-fu
+---
+Vote Fu is a Ruby on Rails plugin allows an arbitrary number of entites (including Users) to vote on models. It is adapted from act_as_voteable. Differences from acts_as_voteable include:
+<ol>
+	<li>You can specify the model name that initiates votes.</li>
+	<li>You can, with a little tuning, have more than one entity type vote on more than one model type.</li>
+	<li>Adds "acts_as_voter" behavior to the initiator of votes.</li>
+	<li>Introduces some newer Rails features like named_scope and :polymorphic keywords</li>
+</ol>
+<a href="http://github.com/peteonrails/vote_fu/tree/master" target="_blank">Browse the code at GitHub</a>, or install into your application as described below.
+<h2>Install</h2>
+<hr />Run the following command:
+<pre lang="bash">./script/plugin install git://github.com/peteonrails/vote_fu.git</pre>
+Create a new rails migration using the generator:
+<pre lang="bash">./script/generate voteable</pre>
+<h2>Usage</h2>
+<hr />
+<h3>Make your ActiveRecord model act as voteable.</h3>
+<pre lang="ruby" line="1">
+class Model < ActiveRecord::Base
+  acts_as_voteable
+end</pre>
+<h3>Make your ActiveRecord model(s) that vote act as voter.</h3>
+<pre lang="ruby" line="1">
+class User < ActiveRecord::Base
+  acts_as_voter
+end
+
+class Robot < ActiveRecord::Base
+  acts_as_voter
+end
+</pre>
+<h3>To cast a vote for a Model you can do the following:</h3>
+
+<h4>New Shorthand Syntax </h4>
+
+VoteFu supports a shorter voting syntax than acts_as_voteable. 
+
+<pre lang="ruby" line="1">	
+voter.vote_for(voteable)     # Adds a +1 vote
+voter.vote_against(voteable) # Adds a -1 vote
+voter.vote(voteable, t_or_f) # Adds either +1 or -1 vote 
+                                    # true => +1, 
+                                    # false => -1
+</pre>
+	
+<h4>ActsAsVoteable syntax</h4>
+The old acts_as_voteable syntax is still supported:
+<pre lang="ruby" line="1">
+vote = Vote.new(:vote => true)
+m    = Model.find(params[:id])
+m.votes    << vote
+user.votes << vote
+</pre>
+
+<h3>Querying votes</h3>
+ActiveRecord models that act as voteable can be queried for the positive votes, negative votes, and a total vote count by using the votes_for, votes_against, and votes_count methods respectively. Here is an example:
+<pre lang="ruby" line="1">
+positiveVoteCount = m.votes_for
+negativeVoteCount = m.votes_against
+totalVoteCount    = m.votes_count
+</pre>
+
+And because the Vote Fu plugin will add the has_many votes relationship to your model you can always get all the votes by using the votes property:
+<pre lang="ruby" line="1">
+allVotes = voteable.votes
+allVotes = voter.votes
+</pre>
+
+The mixin also provides these methods: 
+
+<pre lang="ruby" line="1">
+voter.voted_for?(voteable)  # True if the voter voted for this object. 
+voter.vote_count([true|false|"all"]) # returns the count of +1, -1, or all votes 
+
+voteable.voted_by?(voter) # True if the voter voted for this object. 
+@voters = voteable.voters_who_voted
+</pre>
+
+
+<h4>Named Scopes</h4>
+The Vote model has several named scopes you can use to find vote details:
+<pre lang="ruby" line="1">  
+  @pete_votes = Vote.for_voter(pete)
+  @post_votes = Vote.for_voteable(post)
+  @recent_votes = Vote.recent(1.day.ago)
+  @descending_votes = Vote.descending</pre>
+You can chain these together to make interesting queries:
+<pre lang="ruby"  line="1">
+# Show all of Pete's recent votes for a certain Post, in descending order (newest first)
+@pete_recent_votes_on_post = Vote.for_voter(pete).for_voteable(post).recent(7.days.ago).descending</pre>
+<h2>Credits</h2>
+<hr /><a href="http://www.juixe.com/techknow/index.php/2006/06/24/acts-as-voteable-rails-plugin/">Juixe  - The original ActsAsVoteable plugin inspired this code.</a>
+
+<a href="http://github.com/jackdempsey/acts_as_commentable/tree/master">Xelipe - This plugin is heavily influenced by Acts As Commentable.</a>
+<h2>More</h2>
+<hr /><a href="http://www.juixe.com/techknow/index.php/2006/06/24/acts-as-voteable-rails-plugin/">Documentation from the original acts_as_voteable plugin</a>

@@ -1,0 +1,120 @@
+---
+layout: post
+title: How I became convinced to use db:populate instead of db:migrate with inline
+  data seeding, and why you should too.
+tags:
+- Code
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+  aktt_tweeted: '1'
+  aktt_notify_twitter: 'yes'
+  image: http://blog.peteonrails.com/wp-content/uploads/2009/11/iStock_000006476367XSmall-300x199.jpg
+---
+<img class="alignright size-thumbnail wp-image-178" title="iStock_000002051165XSmall" src="http://blog.peteonrails.com/wp-content/uploads/2009/11/iStock_000002051165XSmall-150x150.jpg" alt="iStock_000002051165XSmall" width="150" height="150" />There's a lot of established debate and best practice around how to populate your database with the initial reference data it needs in order to operate. I'm not going to rehash that here. If you're interested in the options available for seeding data, <a href="http://railspikes.com/2008/2/1/loading-seed-data">read Luke Franci's article on Rails Spikes.</a> Many people I work with seem to like "db:populate" which, while very nice and flexible, always seemed like a little bit of overkill to me.
+
+I was always in favor of seeding short reference data right in the migration like this:
+<pre lang="ruby">class CreateTestScopes < ActiveRecord::Migration
+  def self.up
+    create_table :test_scopes do |t|
+      t.string  :name
+      t.timestamps
+    end
+
+    %w(first second third).each do |e|
+       TestScope.create(:name => e)
+     end
+  end
+
+  def self.down
+    drop_table :test_scopes
+  end
+
+end</pre>
+JUST TO BE CLEAR: we're talking about production reference data that the application requires in order to run. We are not talking about TEST data, which belongs in mocks or (gasp) fixtures. A really good example of legitimate production seed data is the creation of the out-of-box Administrative user.
+
+And if I had to update my reference data, I was also a fan of including it in the migration. After all, it's reference data, not test data, fixture data (eww!) or user data.
+<pre lang="ruby">class CapitalizeTestScopes < ActiveRecord::Migration
+  def self.up
+    TestScope.all.each { |t| t.name = t.name.capitalize; t.save! }
+  end
+
+  def self.down
+    puts "Can't undo, but don't freak out!"
+  end
+end</pre>
+Later, I decided I wanted a sort-order column and decided to add something like this:
+<pre lang="ruby">class AddSortOrderToTestScopes < ActiveRecord::Migration
+  def self.up
+    add_column :test_scopes, :sort_order, :integer
+  end
+  # omit self.down ....
+end
+
+class TestScope &lt; ActiveRecord::Base
+  default_scope :order => "sort_order"
+end</pre>
+And here's the crux of the issue:
+
+By adding a column that the model depends on in the default_scope, we've made it a requirement for the sort_order column to be present in order to load and query the model object. That's fine for me. This migration will run with no errors on my workstation, provided that I ran db:migrate immediately prior to my latest changeset.
+
+However, if you want to come up to speed on my project, you cannot do this:
+<pre lang="bash"> bash# rake db:setup
+ bash# rake db:migrate</pre>
+Because here's what will happen:
+<pre lang="bash">==  CapitalizeTestScopes: migrating ===========================================
+rake aborted!
+An error has occurred, this and all later migrations canceled:
+
+SQLite3::SQLException: no such column: sort_order: SELECT * FROM "test_scopes"  ORDER BY sort_order</pre>
+Since we're using the ActiveRecord object to do our reference updates (which is A GOOD THING, since we get validations and abbreviated syntax), we can't have dependencies in the default scope that are not defined before the first use of the ActiveRecord object in our migrations.
+
+A lot of folks argue that migrations are not reliable and shouldn't be the way you're creating your schema in the first place. To that, I respectfully say, "You're wrong."
+
+It is only because we developers make boneheaded mistakes like the one outlined above that we cannot rely on migrations to rebuild our schema incrementally from migrations. Rather than be boneheaded, we should <strong>be awesome instead</strong> and fix the migration dependencies by moving the data seeding out to a db:populate or other rake task that operates on a completely built data structure. (I know: this is not in line with the movement toward schema.rb as the authoritative source of the database structure. I'm not up for arguing that point today, but I will argue it.)
+
+The answer is to do this:
+<pre lang="ruby"># file: db/migrate/X_create_test_scopes.rb
+class CreateTestScopes < ActiveRecord::Migration
+  def self.up
+    create_table :test_scopes do |t|
+      t.string  :name
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :test_scopes
+  end
+end
+
+# File: db/populate/001_seed_scopes.rb
+%w(first second third).each do |e|
+   TestScope.create(:name => e)
+ end</pre>
+Then, when you have to capitalize your model data:
+<pre lang="ruby"># File: db/populate/002_capitalize_scopes.rb
+TestScope.all.each { |t| t.name = t.name.capitalize; t.save! }</pre>
+And then when you add the sort order:
+<pre lang="ruby">class AddSortOrderToTestScopes < ActiveRecord::Migration
+  def self.up
+    add_column :test_scopes, :sort_order, :integer
+  end
+  # omit self.down ....
+end
+
+class TestScope < ActiveRecord::Base
+  default_scope :order => "sort_order"
+end
+
+# file db/populate/003_seed_sort_order.rb
+TestScope.each_with_index { |e, i| e.sort_order = i; e.save! }</pre>
+Voila! You can run db:migrate with a fresh database and have no errors.
+
+So far, when I encounter an issue that prevents me from rebuilding my complete schema incrementally using db:migrate, it's been a Rails Smell. I haven't found a legitimate reason why migrations can't be sorted out to build cleanly every time. If you can't rebuild your database incrementally using migrations, it's likely that you're doing something wrong.
+
+I ignored this debate for a long time because it didn't really affect me. Don't be like me. Save yourself the trouble of unwinding your migration mess and use an outside seeding package like db:populate.

@@ -1,0 +1,137 @@
+---
+layout: post
+title: Linux and Nvidia 3D accelerated Multi-Head Setup with multiple video cards
+tags: []
+status: draft
+type: post
+published: false
+meta:
+  aktt_notify_twitter: 'no'
+  _edit_last: '2'
+  image: ''
+---
+Linux and Nvidia 3D accelerated Multi-Head Setups with TwinView and multiple video cards (Dual, Triple, or Quad monitors and beyond)
+
+&nbsp;
+
+I'm a developer and an engineer. I like my screen real estate. I also was an OSX user for many years before moving back to Linux two years ago. So I'm used to eye candy, high performance 3D desktop effects, and multihead setups.
+
+&nbsp;
+
+Setting up sophisticated monitor arrangements is still a sticky spot for the average user of a Linux based system. Over the past 10 years, driver support from ATI and Nvidia have improved. If you want a 3D accelerated single or dual monitor setup on one video card, it's generally easy to set up and configure. If you want 2, 3 4, or more monitors on two or more Nvidia graphics cards, then things get more complicated and most people will advise you to set it up wrong. <a href="http://blog.obugger.com/triple-head-setup-on-nvidia-with-linux.html">http://blog.obugger.com/triple-head-setup-on-nvidia-with-linux.html</a> <a href="https://bbs.archlinux.org/viewtopic.php?id=141041">https://bbs.archlinux.org/viewtopic.php?id=141041</a>
+
+&nbsp;
+
+&nbsp;
+
+What Most People Want
+
+&nbsp;
+
+Understanding The Configuration Options
+
+&nbsp;
+
+Separate X Screens
+
+&nbsp;
+
+TLDR: you probably do not want seaparate X screens. If you're not interested in the particulars, skip ahead to the section on TwinView.
+
+&nbsp;
+
+Without Xinerama
+
+&nbsp;
+
+When you have separate X screens, each display is managed independently, and can run its own window manager. You can configure separate X screens to share a mouse and keyboard (this is the default) so that you can move the mouse between your monitors, but you will not be able to drag windows between your screens. This is <strong>not </strong>what most people want.
+
+&nbsp;
+
+You might want separate X screens if you are setting up a multi-seat installation. This is an excellent solution for development shops who want to control costs while still providing high end computing to their developers. Instead of buying everyone a Macbook Pro with Retina display and a Thunderbolt monitor for $5000 a seat, you can instead buy a beefy linux box for $2500 and hook up multiple 2560x1440 monitor workstations. That retina display is wasted anyway: your developers are using the Thunderbolt as their primary and running iTunes on the retina. And, you'll save money on power-strips, ethernet switches, and cabling for all those plugs. The benefits are many, but I digeress.
+
+&nbsp;
+
+If a multi-seat installation interests you, here are some resources:
+
+<a href="http://linuxgazette.net/124/smith.html">http://linuxgazette.net/124/smith.html</a>
+
+<a href="http://www.phoronix.com/scan.php?page=article&amp;item=plugable_multiseat_kick&amp;num=1">http://www.phoronix.com/scan.php?page=article&amp;item=plugable_multiseat_kick&amp;num=1</a>
+
+<a href="https://wiki.archlinux.org/index.php/Xorg_multiseat">https://wiki.archlinux.org/index.php/Xorg_multiseat</a>
+
+&nbsp;
+
+With Xinerama
+
+&nbsp;
+
+If you enable Xinerama on your separate X screens, then one window manager can control all of your displays. You will be able to move your mouse between displays and drag windows between them. There is one huge caveat: you will not be able to use the hardware based 3D acceleration of your Nvidia card(s).
+
+&nbsp;
+
+This means:
+
+&nbsp;
+
+1. You cannot use Unity 3D, and if you are on Ubuntu 12.10 or later, you can't use Unity at all.
+
+2. You can't use Gnome Shell.
+
+3. You can't use Compiz to use desktop effects and other eye candy.
+
+&nbsp;
+
+If you shelled out good money for an Nvidia adapter with 3D acceleration, then this is probably a non-starter for you.
+
+&nbsp;
+
+If unaccelerated 2D graphics and a simpler window manager / desktop environment like Xmonad, Gnome 2 / fallback, LXDE, etc are good enough for you, then enable Xinerama and stop reading this article: you will save yourself time and energy. But you'll miss out on a lot of good stuff.
+
+&nbsp;
+
+TwinView (the right way)
+
+&nbsp;
+
+TwinView is Nvidia's proprietary video mode for making many displays act like one big screen. TwinView exposes Xinerama-like metadata to the window manager so that your desktop shell recognizes the fact that you have more than one screen (ie. So that when you maximize a window, it doesn't span all of your screens.
+
+&nbsp;
+
+<strong>This is important:</strong> contrary to what you may heave read elsewhere, <strong>TwinView does support more than two monitors. </strong> It is unfortunate that the name of the technology implies that it only works with two screens. This has lead many people down to incorrectly assume that Xinerama and 2D graphics were their only choice.
+
+&nbsp;
+
+In order to make Twinview work with 2, 3, 4, 5, 6 or more monitors, you must have the following:
+
+&nbsp;
+
+1. 1, 2 or 3 SLI-capable Nvidia graphics cards configured with appropriate SLI bridge connecetors.
+
+2. A motherboard that supports SLI.
+
+3. Native Nvidia drivers
+
+4. Patience
+
+&nbsp;
+
+Installing Drivers
+
+&nbsp;
+
+This varies from distribution to distribution, but is generally well documented for Ubuntu <a href="https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia">https://help.ubuntu.com/community/BinaryDriverHowto/Nvidia</a>, Arch <a href="https://wiki.archlinux.org/index.php/NVIDIA">https://wiki.archlinux.org/index.php/NVIDIA</a>, RPM based systems like RedHat and Fedora <a href="http://rpmfusion.org/Howto/nVidia">http://rpmfusion.org/Howto/nVidia</a>, and Gentoo <a href="http://en.gentoo-wiki.com/wiki/Nvidia">http://en.gentoo-wiki.com/wiki/Nvidia</a>.
+
+&nbsp;
+
+Pick an article that fits your situation and get those native drivers installed.
+
+&nbsp;
+
+&nbsp;
+
+Getting your XRANDR info
+
+Generating a new xorg.conf
+
+&nbsp;

@@ -1,0 +1,35 @@
+---
+layout: post
+title: VoteFu gets a couple enhancements
+tags:
+- Code
+- Rails
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+  aktt_tweeted: '1'
+---
+The lastest version of <a href="http://github.com/peteonrails/vote_fu/tree/master">VoteFu</a> has a few useful enhancements:
+<ol>
+	<li>Protect against mass assignment forgery. The params hash will only be consulted for :vote =&gt; true or false. The rest has to be assigned in the controller.</li>
+	<li>The acts_as_voteable mixin now has support for tallying votes.</li>
+</ol>
+The documentation will be updated tonight, but briefly, here is what you can do with the new tally() method:
+
+<pre lang="ruby" line="1">
+@items = Item.tally(
+  {  :at_least => 1, 
+      :at_most => 10000,  
+      :start_at => 2.weeks.ago,
+      :end_at => 1.day.ago,
+      :limit => 10,
+      :order => "items.name desc"
+  })
+</pre>
+
+This will select the Items with between 1 and 10,000 votes, the votes having been cast within the last two weeks (not including today), then display the 10 last items in an alphabetical list. 
+ 
+More to come. Enjoy!

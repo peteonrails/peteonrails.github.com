@@ -1,0 +1,69 @@
+---
+layout: post
+title: VoteFu is now available on GemCutter
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  aktt_notify_twitter: 'yes'
+  _edit_last: '2'
+  image: ''
+  aktt_tweeted: '1'
+---
+<img class="alignright size-thumbnail wp-image-195" title="gem" src="http://blog.peteonrails.com/wp-content/uploads/2009/11/gem-150x150.jpg" alt="gem" width="150" height="150" />@alexanderkahn asked me via <a class="zem_slink" title="Twitter" rel="homepage" href="http://twitter.com/">Twitter</a> whether I'd be pushing VoteFu to GemCutter. To tell you the truth, I hadn't really thought about it. But, it does seem to be what all the cool kids are doing.
+
+Want to see how easy it was to move to GemCutter?
+<pre lang="bash">ping:$ sudo gem install gemcutter
+Password:
+
+========================================================================
+
+           Thanks for installing Gemcutter! You can now run:
+
+    gem tumble        use Gemcutter as your primary RubyGem source
+    gem push          publish your gems for the world to use and enjoy
+    gem migrate       take over your gem from <a class="zem_slink" title="RubyForge" rel="homepage" href="http://rubyforge.org/">RubyForge</a> on Gemcutter
+    gem owner         allow/disallow others to push to your gems
+
+========================================================================
+
+Successfully installed gemcutter-0.1.6
+1 gem installed
+Installing ri documentation for gemcutter-0.1.6...
+Installing RDoc documentation for gemcutter-0.1.6...
+ping: Pete$ gem tumble
+Thanks for using Gemcutter!
+Your gem sources are now:
+- http://gemcutter.org
+- http://gems.rubyforge.org
+- http://gems.github.com
+ping:workspace Pete$ cd vote_fu_harness/vendor/plugins/vote_fu/
+ping:vote_fu Pete$ ls
+CHANGELOG.markdown      README.markdown         examples                init.rb                 rails                   test
+MIT-LICENSE             db                      generators              lib                     spec                    vote_fu.gemspec
+ping:vote_fu Pete$ gem build vote_fu.gemspec
+WARNING:  no rubyforge_project specified
+  Successfully built RubyGem
+  Name: vote_fu
+  Version: 0.0.11
+  File: vote_fu-0.0.11.gem
+ping:vote_fu Pete$ gem push vote_fu-0.0.11.gem
+Enter your Gemcutter credentials. Don't have an account yet? Create one at http://gemcutter.org/sign_up
+Email:   pete@peteonrails.com
+Password:
+Signed in. Your api key has been stored in ~/.gemrc
+Pushing gem to Gemcutter...
+Successfully registered gem: vote_fu (0.0.11)
+ping:vote_fu Pete$</pre>
+Scarily easy. In under 3 minutes I have a new primary gem source and am set up to publish to GemCutter.
+
+So, why would one want o host Gems on GemCutter? I asked the same question. In a nutshell:
+<ol>
+	<li>Download counts are shown inline</li>
+	<li>Build locally, then push-to-publish. No more waiting to make your way through DJ, BJ, Resque, or whatever the background framework of the day is at <a class="zem_slink" title="GitHub" rel="homepage" href="http://github.com">GitHub</a>.</li>
+	<li>It's nothing but gem hosting, so it'll probably grow to do gem hosting really well.</li>
+	<li>It's ThoughtBot. I like the ThoughtBot guys.</li>
+</ol>
+So, there's no real compelling reason to run out and move your gems to GemCutter, but if your users ask you to do it, it takes 3 minutes or less.
+<div class="zemanta-pixie" style="margin-top: 10px; height: 15px;"><a class="zemanta-pixie-a" title="Reblog this post [with Zemanta]" href="http://reblog.zemanta.com/zemified/a240f45a-6168-42d3-808c-922211278fb5/"><img class="zemanta-pixie-img" style="border: none; float: right;" src="http://img.zemanta.com/reblog_e.png?x-id=a240f45a-6168-42d3-808c-922211278fb5" alt="Reblog this post [with Zemanta]" /></a><span class="zem-script more-related pretty-attribution"><script src="http://static.zemanta.com/readside/loader.js" type="text/javascript"></script></span></div>

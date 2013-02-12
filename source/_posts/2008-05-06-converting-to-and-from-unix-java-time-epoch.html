@@ -1,0 +1,47 @@
+---
+layout: post
+title: Converting to and from Unix / Java time (epoch)
+tags:
+- Code
+- Rails
+- Ruby
+- Software Development
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '2'
+---
+Working in telecom, I have to integrate my Rails and plain Ruby apps with Java or Unix based systems running on remote hosts. Most often these systems are running remotely and are accessed via an XML-over-HTTP interface (no SOAP, no REST, blah...).
+
+I've found that one of the most infuriating things that UNIX and Java "roll your own web service" writers do is specify "time" fields as "seconds since the epoch". WORSE: Many Java service writers specify time fields as "milliseconds since the epoch". 
+
+Come on, now, people? It's a web service! Do you really think I care about accuracy in milliseconds?
+
+I won't go into a rant about this. Suffice it to say: I Find This BS To Be Lazy. It works that way so that the server software doesn't have to do any complicated date parsing or conversions. 
+
+Fortunately, Ruby makes it easy to deal with if you know the right methods to use. Here's how to convert to a UNIX or Java internal-time:
+
+<pre lang="ruby" line="1">
+rubytime = Time.new  # => Tue May 06 11:11:05 -0400 2008
+
+# .. Convert from Ruby time to Unix time. 
+unixtime = rubytime.to_i            # 1210086665
+javatime = rubytime.to_i * 1000  # 1210086665000 
+</pre> 
+
+What about converting the other way? The example above are converting the "less precise" Ruby time (no milliseconds) into equally or more precise time formats. What do you do when you have a "milliseceonds since epoch" time and you want to use it in Ruby, but preserve the sub-second precision?
+<pre lang="ruby" line="1">
+# Add just over a half second to the time used above
+millis   = 1210086665555  
+
+# adding .0 preserves subsecond accuracy
+precise = Time.at(millis / 1000.0) 
+
+precise.to_i            #  1210086665
+precise.to_f            #  1210086665.555
+precise.to_f * 1000  # 1210086665555.0
+</pre>
+
+Now. Go convince all those legacy Java and Unix service writers to stop specifying "Epoch Time" in their interfaces! It's Just Plain Lazy!
+
